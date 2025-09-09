@@ -1,4 +1,4 @@
-// Define a variable to hold our experiment name
+/* // Define a variable to hold our experiment name
 
 let experiment = 'Stroop';
 console.log(typeof experiment); // string
@@ -9,7 +9,7 @@ Welcome to our experiment. Please read the instructions carefully.
 Welcome to our experiment. Please read the instructions carefully.
 Welcome to our experiment. Please read the instructions carefully.`;
 console.log(welcomeMessage) */
-
+/* 
 let trialCountMax = 20;
 console.log(typeof trialCountMax); //number
 
@@ -28,7 +28,19 @@ console.log(halfWayCount); // Expected 20
 /* Multi line comment
 yup that's that */
 
-let correct = true;
+/* let correct = true;
 console.log(typeof correct);
 
-console.log(10 > 15); // False
+console.log(10 > 15); // False */
+
+/* let answer = prompt("What is 1 + 1?");
+console.log(answer);
+
+let answer2 = prompt("What is 9 + 1?");
+console.log(answer); */
+
+let courseName = 'Programming for Psychologists';
+console.log(courseName.length); // Output: 29
+console.log(courseName.toUpperCase())
+console.log(courseName.indexOf("Psychologists"))
+console.log(courseName.replace("Programming", "Coding"));
