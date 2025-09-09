@@ -1,16 +1,17 @@
-// First alert
 alert("In this experiment we will measure your response time. You will be shown a series of simple math equations. Answer these equations as quickly and accurately as you can.");
-// Define variable and create first prompt
+let start = Date.now();
 let answer1 = prompt("What is 1 + 2?");
-// Alert referencing response to first prompt
-alert("You answered " + answer1);
-// Define second variable and create second prompt
+let end = Date.now();
+let responseTime = (end - start) / 1000;
+alert("You answered " + answer1 + " in " + responseTime + " seconds");
+start = Date.now();
 let answer2 = prompt("What is 1 + 3?");
-// Alert referencing response to second prompt
-alert("You answered " + answer2);
-// Define final variable and create final prompt
+end = Date.now();
+responseTime = (end - start) / 1000;
+alert("You answered " + answer2 + " in " + responseTime + " seconds");
+start = Date.now();
 let answer3 = prompt("What is 1 + 4?");
-// Alert referencing response to final prompt
-alert("You answered " + answer3);
-// Final alert
+end = Date.now();
+responseTime = (end - start) / 1000;
+alert("You answered " + answer3 + " in " + responseTime + " seconds");
 alert("Thank you for your participation!");
