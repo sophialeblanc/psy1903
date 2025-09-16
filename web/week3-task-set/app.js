@@ -26,7 +26,7 @@ if (age == 25) {
     console.log("Age is 25");
 } */
 
-//Setting numerical values to random
+/* //Setting numerical values to random
 let randomNum1 = Math.floor(Math.random() * 10) + 1;
 let randomNum2 = Math.floor(Math.random() * 10) + 1;
 
@@ -47,4 +47,15 @@ if (response == correctAnswer) {
 }
 
 //Universal feedback
-alert(feedback + ' The expected answer is ' + correctAnswer + '.');
+alert(feedback + ' The expected answer is ' + correctAnswer + '.'); */
+
+let age = prompt('How old are you?');
+if (age < 12) {
+    alert('Child');
+}
+if (age >= 12 && age < 18) {
+    alert('Teenager');
+}
+if (age >= 18) {
+    alert('Adult');
+}
