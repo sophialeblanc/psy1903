@@ -9,7 +9,7 @@ Welcome to our experiment. Please read the instructions carefully.
 Welcome to our experiment. Please read the instructions carefully.
 Welcome to our experiment. Please read the instructions carefully.`;
 console.log(welcomeMessage) */
-/* 
+/*
 let trialCountMax = 20;
 console.log(typeof trialCountMax); //number
 
@@ -38,9 +38,21 @@ console.log(answer);
 
 let answer2 = prompt("What is 9 + 1?");
 console.log(answer); */
-
+/*
 let courseName = 'Programming for Psychologists';
 console.log(courseName.length); // Output: 29
 console.log(courseName.toUpperCase())
 console.log(courseName.indexOf("Psychologists"))
-console.log(courseName.replace("Programming", "Coding"));
+console.log(courseName.replace("Programming", "Coding")); */
+
+// Errors & AI demo
+/* 
+console.log(5 == 5 && 10 > 1);
+console.log('red' == 'blue' || 1 < 10)
+console.log(20 > 15 < 15)
+console.log(12 % 2 == 0)
+console.log('red' != 'green' || 'orange' == 'purple')
+console.log((10 >= 10) && (false == false) && (20 !== 19))
+console.log(true && true || false) */
+
+console.log(8 < 7 < 1)
