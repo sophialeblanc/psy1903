@@ -49,7 +49,7 @@ if (response == correctAnswer) {
 //Universal feedback
 alert(feedback + ' The expected answer is ' + correctAnswer + '.'); */
 
-let age = prompt('How old are you?');
+/* let age = prompt('How old are you?');
 if (age < 12) {
     alert('Child');
 }
@@ -58,4 +58,12 @@ if (age >= 12 && age < 18) {
 }
 if (age >= 18) {
     alert('Adult');
+} */
+
+let response = prompt('Please enter a whole number')
+if (response % 2 == 0) {
+    alert('The number you entered was even')
+}
+else {
+    alert('The number you entered was odd')
 }
