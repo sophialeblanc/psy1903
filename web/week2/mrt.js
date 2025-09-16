@@ -20,5 +20,4 @@ let answer3 = prompt("What is " + math1 + " + " + math2 + "?");
 end = Date.now();
 responseTime = (end - start) / 1000;
 alert("You answered " + answer3 + " in " + responseTime + " seconds");
-alert("Thank you for your participation!");
- */
+alert("Thank you for your participation!"); */
