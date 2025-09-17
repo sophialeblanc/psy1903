@@ -1,4 +1,4 @@
-/* // Identify elements we want to update
+// Identify elements we want to update
 
 let num1 = document.getElementById('num1');
 let num2 = document.getElementById('num2');
@@ -11,7 +11,40 @@ let randomNum2 = Math.floor(Math.random() * 10) + 1;
 // Update elements on the page
 
 num1.innerHTML = randomNum1;
-num2.innerHTML = randomNum2; */
+num2.innerHTML = randomNum2;
+
+let start = Date.now();
+
+//Add form for submission
+let form = document.getElementsByTagName('form')[0];
+let results = document.getElementById('results');
+
+//Listen for form to be submitted
+form.addEventListener('submit', function (event) {
+
+    // Prevent the default form submission 
+    event.preventDefault();
+
+    // Collect the response
+    let response = form.elements['response'].value;
+
+    //End timer
+    let end = Date.now();
+
+    let responseTime = (end - start) / 1000;
+
+    let correctResponse = randomNum1 + randomNum2;
+
+    // Report the results
+    form.style.display = 'none';
+
+    if (response == correctResponse) {
+        results.innerHTML = 'You answered ' + response + ' in ' + responseTime + ' seconds. Your response was CORRECT';
+    }
+    else {
+        results.innerHTML = 'You answered ' + response + ' in ' + responseTime + ' seconds. Your response was INCORRECT';
+    }
+});
 
 /* let response = prompt('What is your name?');
 let count = response.length;
@@ -68,7 +101,7 @@ else {
     alert('The number you entered was odd');
 }
  */
-//Initial alert
+/* //Initial alert
 alert("In this experiment we will measure your response time. You will be shown a series of simple math equations. Answer these equations as quickly and accurately as you can.");
 
 //Setting variables for ease of use, can be redefined throughout
@@ -129,4 +162,5 @@ else {
 }
 
 //Final goodbye alert
-alert("Thank you for your participation!");
+alert("Thank you for your participation!"); */
+
