@@ -1,4 +1,4 @@
-/* // Identify elements we want to update
+// Identify elements we want to update
 
 let num1 = document.getElementById('num1');
 let num2 = document.getElementById('num2');
@@ -44,7 +44,7 @@ form.addEventListener('submit', function (event) {
     else {
         results.innerHTML = 'You answered ' + response + ' in ' + responseTime + ' seconds. Your response was INCORRECT';
     }
-}); */
+});
 
 
 
@@ -84,7 +84,7 @@ if (response == correctAnswer) {
 //Universal feedback
 alert(feedback + ' The expected answer is ' + correctAnswer + '.'); */
 
-let age = prompt('How old are you?');
+/* let age = prompt('How old are you?');
 if (age < 12) {
     alert('Child');
 }
@@ -93,7 +93,7 @@ else if (age < 18) {
 }
 else {
     alert('Adult');
-}
+} */
 
 /* let response = prompt('Please enter a whole number');
 if (response % 2 == 0) {
