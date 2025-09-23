@@ -93,7 +93,7 @@ console.log(namesThatStartWithA); */
  */
 //Refactor 
 
-let results = [];
+/* let results = [];
 
 function getRandomNumber(min, max) {
     let randomNumber = Math.floor(Math.random() * max) + min;
@@ -115,6 +115,107 @@ for (let i = 0; i < 3; i++) {
     }
 
     results.push([feedback, responseTime]);
+
+    alert(`You answered ${response} (${feedback}) in ${responseTime} seconds`);
+}
+
+console.log(results); */
+
+/* //Objects
+
+//Arrays: store multiple elements, accessed via numerical indexes
+let participant = ['Alice', 21, true];
+
+//As OBJECT
+let participantB = {
+    name: 'Alice',
+    age: 21,
+    consent: true
+}
+participantB.consent = false;
+participantB.startTime = '2:00pm';
+delete participantB.age;
+console.log(participantB);
+
+if (participant[2]) { }
+
+if (participantB.consent) { } */
+
+/* let person = {
+    // Strings
+    firstName: 'Elliot',
+    lastName: 'Brown',
+
+    // Number
+    age: 30,
+
+    // Array
+    hobbies: ['reading', 'gaming', 'hiking'],
+
+    // Nested Object
+    address: {
+        street: '324 Western Ave',
+        city: 'Cambridge',
+        zipCode: '02139'
+    },
+
+    // Functions
+    // Observe how the keyword *this* is used in functions to reference other properties within this object
+    getFullName: function () {
+        return `${this.firstName} ${this.lastName}`;
+    },
+
+    greet: function () {
+        return `Hello, my name is ${this.getFullName()} and I am ${this.age} years old.`;
+    },
+
+    getAddress: function () {
+        return `I live at ${this.address.street}, ${this.address.city} ${this.address.zipCode}`;
+    },
+
+    getHobbies: function () {
+        return `My hobbies include ${this.hobbies.join(', ')}`;
+    }
+};
+
+// Testing the functions, accessed via dot notation and invoked with parenthesis
+console.log(person.greet()); // Hello, my name is Elliot Brown and I am 30 years old.
+
+console.log(person.getAddress()); // I live at 324 Western Ave, Cambridge 02139
+console.log(person.getHobbies()); // My hobbies include reading, gaming, hiking
+
+// Testing the properties
+console.log(person.firstName); // Elliot
+console.log(person.age); // 30 */
+
+let results = [];
+
+function getRandomNumber(min, max) {
+    let randomNumber = Math.floor(Math.random() * max) + min;
+    return randomNumber;
+}
+
+for (let i = 0; i < 3; i++) {
+
+    let math1 = getRandomNumber(1, 10);
+    let math2 = getRandomNumber(1, 10);
+    let start = Date.now();
+    let response = prompt(`What is ${math1} + ${math2}?`);
+    let end = Date.now();
+    let responseTime = (end - start) / 1000;
+    let answer = math1 + math2
+    if (response == answer) {
+        feedback = 'correct';
+    } else {
+        feedback = 'incorrect';
+    }
+
+    results.push({
+        response: response,
+        answer: answer,
+        feedback: feedback,
+        time: responseTime,
+    });
 
     alert(`You answered ${response} (${feedback}) in ${responseTime} seconds`);
 }
