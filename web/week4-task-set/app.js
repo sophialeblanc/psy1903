@@ -59,7 +59,7 @@ console.log(getLongestWord(words)); // Expected output: banana
 console.log(getOddNumbers([1, 2, 3, 4, 5])); // Expected output: [1, 3, 5]
 console.log(getOddNumbers([12, 45, 10, 11, 61])); // Expected output: [45, 11, 61]
  */
-function filterNumbers(numbers, evenOrOdd) {
+/* function filterNumbers(numbers, evenOrOdd) {
     let results = [];
 
     if (evenOrOdd == 'even') {
@@ -76,7 +76,7 @@ function filterNumbers(numbers, evenOrOdd) {
             }
         }
     }
-    return results
+    return results;
 }
 
 console.log(filterNumbers([1, 2, 3, 4, 5], 'even')); // Expected output: [2, 4]
@@ -84,4 +84,39 @@ console.log(filterNumbers([1, 2, 3, 4, 5], 'odd')); // Expected output: [1, 3, 5
 
 console.log(filterNumbers([45, 10, 11, 61], 'even')); // Expected output: [10]
 console.log(filterNumbers([45, 10, 11, 61], 'odd')); // Expected output: [45, 11, 61]
+ */
 
+alert("Welcome to the even/odd response time task.\n\nYou are about to see a series of numbers.\n\nIf the number you see is EVEN, type the letter 'e'.\nIf the number you see is odd, type the letter 'o'.\n\nPlease answer as quickly and accurately as possible.");
+
+let results = [];
+
+function getRandomNumber(min, max) {
+    let randomNumber = Math.floor(Math.random() * max) + min;
+    return randomNumber;
+}
+
+for (let i = 0; i < 5; i++) {
+    let number = getRandomNumber(1, 20);
+    let answer = '';
+    let start = Date.now();
+    let response = prompt(`Number: ${number}\nType the letter "e" for EVEN\nType the letter "o" for ODD.`);
+    let end = Date.now();
+    if (number % 2 == 0) {
+        answer = 'e';
+    }
+    else if (number % 2 !== 0) {
+        answer = 'o';
+    }
+    let correct = response == answer;
+    let responseTime = (end - start) / 1000;
+    let result = {
+        number: number,
+        response: response,
+        correct: correct,
+        responseTime: responseTime,
+    }
+    results.push(result);
+}
+
+alert('Thank you for your time!');
+console.log(results);
