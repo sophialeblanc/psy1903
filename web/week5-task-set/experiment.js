@@ -1,4 +1,4 @@
-/* let jsPsych = initJsPsych();
+let jsPsych = initJsPsych();
 let timeline = [];
 
 // Welcome
@@ -24,20 +24,32 @@ timeline.push(welcomeTrial);
 
 // Create an object, made of key - value pairs, make up parameters (ingredients) of plugin
 
-let ageTrial = {
-    type: jsPsychSurveyHtmlForm,
-    preamble: '<p>How old are you?</p>',
-    html: `<p><input type='text' name='age' id='age'></p>`,
-    autofocus: 'age', // id of the field we want to auto-focus on when the trial starts
-    button_label: 'Submit Answer',
-    data: {
-        collect: true,
-    },
-    on_finish: function (data) {
-        data.age = data.response.age;
+for (let block of conditions) {
+
+    let blockTrial = {
+        type: jsPsychSurveyHtmlForm,
+        preamble: `What is ${block.num1} + ${block.num2}?`,
+        html: `<p><input type='text' name='answer' id='answer'></p>`,
+        autofocus: 'answer',
+        button_label: 'Submit Answer',
+        data: {
+            collect: true,
+        },
+        on_finish: function (data) {
+            data.num1 = block.num1;
+            data.num2 = block.num2;
+            data.correctAnswer = block.correctAnswer;
+            data.answer = data.response.answer;
+            if (data.answer == block.correctAnswer) {
+                data.correct = true;
+            }
+            else {
+                data.correct = false;
+            }
+        }
     }
-}
-timeline.push(ageTrial);
+    timeline.push(blockTrial);
+};
 
 // Debrief
 let debriefTrial = {
@@ -58,5 +70,21 @@ let debriefTrial = {
 }
 timeline.push(debriefTrial);
 
-jsPsych.run(timeline); */
+jsPsych.run(timeline);
+
+
+/* let ageTrial = {
+    type: jsPsychSurveyHtmlForm,
+    preamble: '<p>How old are you?</p>',
+    html: `<p><input type='text' name='age' id='age'></p>`,
+    autofocus: 'age', // id of the field we want to auto-focus on when the trial starts
+    button_label: 'Submit Answer',
+    data: {
+        collect: true,
+    },
+    on_finish: function (data) {
+        data.age = data.response.age;
+    }
+}
+timeline.push(ageTrial); */
 
