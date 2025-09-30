@@ -1,4 +1,4 @@
-let jsPsych = initJsPsych();
+/* let jsPsych = initJsPsych();
 let timeline = [];
 
 // Welcome
@@ -58,5 +58,5 @@ let debriefTrial = {
 }
 timeline.push(debriefTrial);
 
-jsPsych.run(timeline);
+jsPsych.run(timeline); */
 
