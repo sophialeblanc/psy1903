@@ -13,7 +13,7 @@ let welcomeTrial = {
 
     <p>In this experiment, you will be shown a series of characters and asked to categorize whether the characters make up a word or not.</p>
     <p>There are three parts to this experiment.</p>
-    <p>Press SPACE to begin the first part.</p>
+    <p class='instructions'>Press <span class='key'>SPACE</span> to begin the first part.</p>
     `,
 
     // Listen for the SPACE key to be pressed to proceed
@@ -65,6 +65,59 @@ for (let block of conditions) {
         timeline.push(conditionTrial);
     }
 }
+
+let resultsTrial = {
+    type: jsPsychHtmlKeyboardResponse,
+    choices: ['NO KEYS'],
+    async: false,
+    stimulus: `
+        <h1>Please wait...</h1>
+        <span class='loader'></span>
+        <p>We are saving the results of your inputs.</p>
+        `,
+    on_start: function () {
+        //  ⭐ Update the following three values as appropriate ⭐
+        let prefix = 'lexical-decision';
+        let dataPipeExperimentId = 'your-experiment-id-here';
+        let forceOSFSave = false;
+
+        // Filter and retrieve results as CSV data
+        let results = jsPsych.data
+            .get()
+            .filter({ collect: true })
+            .ignore(['stimulus', 'trial_type', 'plugin_version', 'collect'])
+            .csv();
+
+        // Generate a participant ID based on the current timestamp
+        let participantId = new Date().toISOString().replace(/T/, '-').replace(/\..+/, '').replace(/:/g, '-');
+
+        // Dynamically determine if the experiment is currently running locally or on production
+        let isLocalHost = window.location.href.includes('localhost');
+
+        let destination = '/save';
+        if (!isLocalHost || forceOSFSave) {
+            destination = 'https://pipe.jspsych.org/api/data/';
+        }
+
+        // Send the results to our saving end point
+        fetch(destination, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: '*/*',
+            },
+            body: JSON.stringify({
+                experimentID: dataPipeExperimentId,
+                filename: prefix + '-' + participantId + '.csv',
+                data: results,
+            }),
+        }).then(data => {
+            console.log(data);
+            jsPsych.finishTrial();
+        })
+    }
+}
+timeline.push(resultsTrial);
 
 // Debrief
 let debriefTrial = {
