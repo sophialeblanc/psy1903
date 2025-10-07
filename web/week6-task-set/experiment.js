@@ -195,6 +195,31 @@ let welcomeTrial = {
 
 timeline.push(welcomeTrial);
 
+let likert_scale = [
+    "Strongly Disagree",
+    "Disagree",
+    "Neutral",
+    "Agree",
+    "Strongly Agree"
+];
+
+let likertTrial = {
+    type: jsPsychSurveyLikert,
+    questions: [
+        { prompt: "I enjoy solving math problems.", name: 'Enjoy', labels: likert_scale },
+        { prompt: "I find math easy.", name: 'Easy', labels: likert_scale },
+    ],
+    data: {
+        collect: true,
+    },
+    on_finish: function (data) {
+        data.likertEnjoy = data.response.Enjoy;
+        data.likertEasy = data.response.Easy;
+    }
+}
+
+timeline.push(likertTrial);
+
 // Create an object, made of key - value pairs, make up parameters (ingredients) of plugin
 
 for (let block of conditions) {
@@ -233,7 +258,7 @@ let debriefTrial = {
         let data = jsPsych.data
             .get()
             .filter({ collect: true })
-            .ignore(['response', 'stimulus', 'trial_type', 'trial_index', 'plugin_version', 'collect'])
+            .ignore(['stimulus', 'trial_type', 'trial_index', 'plugin_version', 'collect'])
             .csv()
         console.log(data);
     }
