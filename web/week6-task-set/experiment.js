@@ -182,11 +182,11 @@ let welcomeTrial = {
 
     // What stimulus to display on the screen
     stimulus: `
-    <h1>Welcome to the Math Response Time Task!</h1> 
+    <h1><span class='head'>Welcome to the Math Response Time Task!</span></h1> 
 
     <p>In this experiment, you will be shown a series of math questions.</p>
     <p>Please answer as quickly and accurately as possible.</p>
-    <p>Press SPACE to begin.</p>
+    <p>Press <span class='key'>SPACE</span> to begin.</p>
     `,
 
     // Listen for the SPACE key to be pressed to proceed
@@ -199,26 +199,23 @@ timeline.push(welcomeTrial);
 
 for (let block of conditions) {
 
-    let choices = [block.correctAnswer, block.altAnswer];
-    choices = jsPsych.randomization.repeat(choices, 1);
-
-
     let blockTrial = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: `<p>What is ${block.num1} + ${block.num2}?</p>`,
-        choices: choices,
+        type: jsPsychSurveyHtmlForm,
+        preamble: `<span class='equation'>What is <span class='num'>${block.num1}</span> + <span class='num'>${block.num2}</span>?</span>`,
+        html: `<p><input type='text' name='answer' id='answer'></p>`,
+        autofocus: 'answer',
+        button_label: 'Submit Answer',
         data: {
             collect: true,
-        }, //  AI Usage: on_finish can now work with values through data, not dependent on block which could lead to using wrong item in conditions array
+        },
         on_finish: function (data) {
             data.num1 = block.num1;
             data.num2 = block.num2;
             data.correctAnswer = block.correctAnswer;
-            data.altAnswer = block.altAnswer;
 
             console.log(data.response);
-            data.answer = choices[data.response];
-            data.correct = choices[data.response] == block.correctAnswer;
+            data.answer = data.response.answer;
+            data.correct = data.answer == block.correctAnswer;
         }
     };
     timeline.push(blockTrial);
