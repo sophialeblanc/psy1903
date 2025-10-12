@@ -1,6 +1,16 @@
 let jsPsych = initJsPsych();
 let timeline = [];
 
+// Set arrays for blocks to define outside of loop + later push to timeline
+
+let uncertainBlock = [];
+let ambigBlock = [];
+
+// Shuffle images within respective blocks
+
+let shuffledUncertain = jsPsych.randomization.shuffle(uncertainConditions);
+let shuffledAmbig = jsPsych.randomization.shuffle(ambigConditions);
+
 // Welcome & consent trial
 // NEED TO DO - mention you will recieve two games/instructions
 
@@ -43,53 +53,50 @@ let ambigInstructTrial = {
 
 // UNCERTAIN Block
 
-let uncertainBlock = {
+for (let condition of shuffledUncertain) {
 
-    for(let image of uncertainConditions) {
-
-        let choices = ['Lottery: Draw a chip', '$5'];
-        choices = jsPsych.randomization.repeat(choices, 1);
+    let choices = ['Lottery: Draw a chip', '$5'];
+    choices = jsPsych.randomization.repeat(choices, 1);
 
 
-        let uncertainTrial = {
-            type: jsPsychHtmlButtonResponse,
-            stimulus: conditions,
-            choices: choices,
-            data: {
-                collect: true,
-                on_finish: function (data) {
-                    console.log(data.response);
-                    data.answer = choices[data.response];
-                }
-            },
-        };
-    }
-}
+    uncertainBlock.push({
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<img src="${condition.image}">`,
+        choices: choices,
+        data: {
+            collect: true,
+        },
+        on_finish: function (data) {
+            console.log(data.response);
+            data.answer = choices[data.response];
+        }
+    });
+};
+
 
 // AMBIGUOUS Block
 
-let ambigBlock = {
+for (let condition of shuffledAmbig) {
 
-    for(let image of ambigConditions) {
-
-        let choices = ['Lottery: Draw a chip', '$5'];
-        choices = jsPsych.randomization.repeat(choices, 1);
+    let choices = ['Lottery: Draw a chip', '$5'];
+    choices = jsPsych.randomization.repeat(choices, 1);
 
 
-        let ambigTrial = {
-            type: jsPsychHtmlButtonResponse,
-            stimulus: conditions,
-            choices: choices,
-            data: {
-                collect: true,
-                on_finish: function (data) {
-                    console.log(data.response);
-                    data.answer = choices[data.response];
-                }
-            },
-        };
-    }
-}
+    ambigBlock.push({
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<img src="${condition.image}">`,
+        choices: choices,
+        data: {
+            collect: true,
+        },
+        on_finish: function (data) {
+            console.log(data.response);
+            data.answer = choices[data.response];
+        },
+    });
+};
+
+// determine if data.response / data collection is messed up bc named same for ambig and uncertain
 
 // Setting timelines for Within Subjects
 
@@ -99,13 +106,14 @@ let randomizedBlockOrder = jsPsych.randomization.shuffle(blocks);
 randomizedBlockOrder.forEach(block => {
     if (block === "Uncertain") {
         timeline.push(uncertainInstructTrial);
-        timeline.push(uncertainBlock);
+        timeline.push(...uncertainBlock);
     } else if (block === "Ambiguous") {
         timeline.push(ambigInstructTrial);
-        timeline.push(ambigBlock);
+        timeline.push(...ambigBlock);
     }
 });
-//EDIT TO COLLECT THIS DATA ^^ RANDOM ORDER
+
+// EDIT TO COLLECT THIS DATA ^^ RANDOM ORDER
 
 // Likert survey trial
 // NEED TO DO
