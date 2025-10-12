@@ -9,4 +9,3 @@ let uncertainConditions = [
 ];
 
 
-// snapshot
