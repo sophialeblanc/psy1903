@@ -7,3 +7,6 @@ let uncertainConditions = [
     { image: 'blue.png' },
     { image: 'test.png' }
 ];
+
+
+// snapshot

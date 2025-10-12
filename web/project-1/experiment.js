@@ -168,3 +168,5 @@ let debriefTrial = {
 timeline.push(debriefTrial);
 
 jsPsych.run(timeline);
+
+// snapshot
