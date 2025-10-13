@@ -9,7 +9,7 @@ let welcomeTrial = {
 
     // What stimulus to display on the screen
     stimulus: `
-    <h1>Welcome to the Lexical Decision Task!</h1> 
+    <h1>Welcome to the Lexical Decision Task...</h1> 
 
     <p>In this experiment, you will be shown a series of characters and asked to categorize whether the characters make up a word or not.</p>
     <p>There are three parts to this experiment.</p>
