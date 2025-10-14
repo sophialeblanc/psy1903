@@ -128,15 +128,13 @@ let likertTrial = {
     questions: questions,
     randomize_question_order: false,
     data: {
-        collect: true
-    }
-
+        collect: true,
+    },
 };
 
 timeline.push(likertTrial);
 
 // Results Trial
-// NEED TO EDIT
 
 let resultsTrial = {
     type: jsPsychHtmlKeyboardResponse,
@@ -150,14 +148,14 @@ let resultsTrial = {
     on_start: function () {
         //  ⭐ Update the following three values as appropriate ⭐
         let prefix = 'uncertainty-tolerance';
-        let dataPipeExperimentId = 'OV8df8DU3zXE';
+        let dataPipeExperimentId = 'RoLxszwW5Vh3';
         let forceOSFSave = true;
 
         // Filter and retrieve results as CSV data
         let results = jsPsych.data
             .get()
             .filter({ collect: true })
-            .ignore(['stimulus', 'plugin_version', 'collect'])
+            .ignore(['stimulus', 'trial_type', 'plugin_version', 'collect'])
             .csv();
 
         // Generate a participant ID based on the current timestamp
@@ -198,6 +196,7 @@ let exitFullScreenTrial = {
     type: jsPsychFullscreen,
     fullscreen_mode: false
 };
+
 timeline.push(exitFullScreenTrial);
 
 // Debrief
