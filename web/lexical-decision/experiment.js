@@ -1,5 +1,29 @@
-let jsPsych = initJsPsych();
+let jsPsych = initJsPsych({
+    show_progress_bar: true
+});
 let timeline = [];
+
+let ageCheckTrial = {
+    type: jsPsychSurveyHtmlForm,
+    html: `
+    <h1>Welcome!</h1> 
+    Please enter your age to continue: <input type='text' name='age' id='age'>
+    `,
+    autofocus: 'age',
+    on_finish: function (data) {
+        if (data.response.age < 18) {
+            jsPsych.abortExperiment('You must be 18 years or older to complete this experiment.');
+        }
+    }
+}
+timeline.push(ageCheckTrial);
+
+let enterFullScreenTrial = {
+    type: jsPsychFullscreen,
+    fullscreen_mode: true
+};
+
+timeline.push(enterFullScreenTrial);
 
 // Welcome
 // Define a welcome trial using jsPsych’s jsPsychHtmlKeyboardResponse plugin
@@ -19,10 +43,31 @@ let welcomeTrial = {
     // Listen for the SPACE key to be pressed to proceed
     choices: [' '],
 };
-
 timeline.push(welcomeTrial);
 
 // Showed word or pseudo word (on repeat)
+
+let primeTrial = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+        <p>You were randomly chosen to see this trial.</p> 
+        <p>Press the <span class='key'>SPACE</span> key to continue.</p>
+        `,
+    choices: [' '],
+    data: {
+        collect: true,
+        trialType: 'prime',
+    },
+    on_load: function () {
+        if (getRandomNumber(0, 1) == 0) {
+            jsPsych.data.addProperties({ sawPrime: false });
+            jsPsych.finishTrial();
+        } else {
+            jsPsych.data.addProperties({ sawPrime: true });
+        }
+    }
+}
+timeline.push(primeTrial);
 
 for (let block of conditions) {
 
@@ -48,6 +93,7 @@ for (let block of conditions) {
             stimulus: `<h1>${condition.characters}</h1>`,
             choices: ['f', 'j'],
             data: {
+                trialType: 'mainTrial',
                 collect: true,
                 characters: condition.characters,
                 blockId: block.title,
@@ -66,6 +112,21 @@ for (let block of conditions) {
     }
 }
 
+let feedbackTrial = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<h1 class = 'incorrectFeedback'>Incorrect</h1>`,
+    trial_duration: 2000,
+    choices: ['NO KEY'],
+    on_load: function () {
+        let lastTrialData = jsPsych.data.getLastTrialData().values()[0];
+        if (lastTrialData.correct) {
+            // Force skip this feedback trial if they got the previous trial correct
+            jsPsych.finishTrial();
+        }
+    },
+}
+timeline.push(feedbackTrial);
+
 let resultsTrial = {
     type: jsPsychHtmlKeyboardResponse,
     choices: ['NO KEYS'],
@@ -78,7 +139,7 @@ let resultsTrial = {
     on_start: function () {
         //  ⭐ Update the following three values as appropriate ⭐
         let prefix = 'lexical-decision';
-        let dataPipeExperimentId = 'your-experiment-id-here';
+        let dataPipeExperimentId = 'RoLxszwW5Vh3';
         let forceOSFSave = false;
 
         // Filter and retrieve results as CSV data
@@ -119,6 +180,12 @@ let resultsTrial = {
 }
 timeline.push(resultsTrial);
 
+let exitFullScreenTrial = {
+    type: jsPsychFullscreen,
+    fullscreen_mode: false
+};
+timeline.push(exitFullScreenTrial);
+
 // Debrief
 let debriefTrial = {
     type: jsPsychHtmlKeyboardResponse,
@@ -128,6 +195,7 @@ let debriefTrial = {
     `,
     choices: ['NO KEYS'],
     on_start: function () {
+        jsPsych.progressBar.progress = 1;
         let data = jsPsych.data
             .get().
             filter({ collect: true })
@@ -140,3 +208,4 @@ let debriefTrial = {
 timeline.push(debriefTrial);
 
 jsPsych.run(timeline);
+

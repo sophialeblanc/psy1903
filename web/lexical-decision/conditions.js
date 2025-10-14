@@ -1,4 +1,9 @@
 // Create an array of conditions
+function getRandomNumber(min, max) {
+    let randomNumber = Math.floor(Math.random() * max) + min;
+    return randomNumber;
+}
+
 let conditions = [
     {
         title: 'Part 1',
