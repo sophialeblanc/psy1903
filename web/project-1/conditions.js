@@ -11,7 +11,7 @@ let conditions = [
         <p>We have multiple bags with different proportions of blue and red chips. The colored bars represent the shares of blue and red chips in the bag.</p>
         <p>At the end of the task, one trial will be randomly picked: for example, if on that trial, you chose the sure outcome of $5, you will receive the $5, </p>
         <p>if you chose the lottery, we will play the lottery and receive the payout based on the outcome.</p>
-        <p>When you are ready, press [SPACE] to begin.</p>
+        <p>When you are ready, press <span class='key'>SPACE</span> to begin.</p>
         `,
         stimuli: [
             { image: 'img/unc/unc-75-5.png' },
@@ -39,7 +39,7 @@ let conditions = [
         <p>We have multiple bags with different proportions of blue and red chips. The colored bars represent the shares of blue and red chips in the bag.</p>
         <p>You will not be able to see what the exact shares of blue and red chips are.</p>
         <p>At the end of the task, one trial will be randomly picked: for example, if on that trial, you chose the sure outcome of $5, you will receive the $5, if you chose the lottery, we will play the lottery and receive the payout based on the outcome.</p>
-        <p>When you are ready, press [SPACE] to begin.</>
+        <p>When you are ready, press <span class='key'>SPACE</span> to begin.</>
     `,
         stimuli: [
             { image: 'img/amb/amb-74-5.png' },
