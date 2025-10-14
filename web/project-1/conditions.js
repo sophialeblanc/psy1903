@@ -8,7 +8,7 @@ let conditions = [
         <h1>Instructions</h1>
         <p>We have multiple bags which contain different proportions of blue and red chips. You will be shown colored bars that represent the shares of blue and red chips in the bag.</p>
         <p>You will play a game for hypothetical monetary reward. For each bag of chips, you can decide to lottery (pick a random chip) or take a safe bet (ensured $5 reward). Blue chips will result in $0, and red chip values will change per bag.</p>
-        <p>In this part of the task, you will see the exact shares of blue and red chips in the bag.</p>
+        <p>In this part of the task, <span class='manipulation'>you will see the exact shares of blue and red chips</span> in the bag.</p>
         <p>When you are ready, press <span class='key'>SPACE</span> to begin.</>
     `,
         stimuli: [
@@ -35,7 +35,7 @@ let conditions = [
         <h1>Instructions</h1>
         <p>We have multiple bags which contain different proportions of blue and red chips. You will be shown colored bars that represent the shares of blue and red chips in the bag.</p>
         <p>You will play a game for hypothetical monetary reward. For each bag of chips, you can decide to lottery (pick a random chip) or take a safe bet (ensured $5 reward). Blue chips will result in $0, and red chip values will change per bag.</p>
-        <p>In this part of the task, you will not see the exact shares of blue and red chips in the bag. A gray bar will occlude some portion of the bar.</p>
+        <p>In this part of the task, <span class='manipulation'>you will not see the exact shares of blue and red chips</span> in the bag. A gray bar will occlude some portion of the bar.</p>
         <p>When you are ready, press <span class='key'>SPACE</span> to begin.</>
     `,
         stimuli: [

@@ -15,3 +15,7 @@
     box-sizing: border-box;
     animation: rotation 1s linear infinite;
 }
+
+.manipulation {
+    font-weight: bold;
+}
