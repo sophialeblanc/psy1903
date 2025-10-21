@@ -42,7 +42,7 @@ let generalInstruct = {
     <img src='img/bag.png'>
     <p>Colored bars on the screen show how much of each color is in the bag for that round.</p>
     <p>Red and blue chips will result in different monetary rewards. Example:</p>
-    <img src='img/barDiagram.png'>
+    <img src='img/barDiagram.png' style='width: 300px;'>
     <p>Your decisions may affect the amount of reward you receive at the end of the study.</p>
     <p>Press <span class='key'>SPACE</span> to continue.</>
     `,
