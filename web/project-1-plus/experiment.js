@@ -37,11 +37,12 @@ let generalInstruct = {
     stimulus: `
     <h1>Welcome</h1> 
 
-    <p>In this game, you will make a series of choices between a lottery and a sure payout.</p>
-    <p>Each lottery involves guessing which color chip (blue or red) will be drawn from a bag containing both colors in varying proportions.</p>
+    <p>In this game, you will make a series of choices between a lottery and a sure payout of $5.</p>
+    <p>If you choose to lottery, a color chip (blue or red) will be drawn from a bag containing both colors in varying proportions.</p>
     <img src='bag.png'>
-    <p>Colored bars on the screen show how much of each color is in the bag for that round. Example:</p>
-    <img src='images/!!!!!!.png'>
+    <p>Colored bars on the screen show how much of each color is in the bag for that round.</p>
+    <p>Red and blue chips will result in different monetary rewards. Example:</p>
+    <img src='barDiagram.png'>
     <p>Your decisions may affect the amount of reward you receive at the end of the study.</p>
     <p>Press <span class='key'>SPACE</span> to continue.</>
     `,
