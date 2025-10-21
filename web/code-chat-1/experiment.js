@@ -1,16 +1,46 @@
 let jsPsych = initJsPsych();
 let timeline = [];
 
-
-
-// Welcome trial will go here
-
-
+// Welcome
+let welcomeTrial = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+    <h1 class='welcomeHeader'>Welcome!</h1> 
+    <p>In this experiment, you will be shown a series of words.</p>
+    <p>Press the letter <span class='key'>F</span> if the word is positive.</p>
+    <p>Press the letter <span class='key'>J</span> if the word is negative.</p>
+    <p>Press <span class='key'>SPACE</span> to begin.</p>
+    `,
+    choices: [' '],
+};
+timeline.push(welcomeTrial);
 
 
 // Main trials will go here
 
-
+for (let condition of jsPsych.randomization.repeat(conditions, 1)) {
+    let conditionTrial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<h1>${condition.word}</h1>`,
+        choices: ['f', 'j'],
+        data: {
+            trialType: 'mainTrial',
+            collect: true,
+            word: condition.word,
+            valence: condition.valence,
+        },
+        on_finish: function (data) {
+            if (data.response == 'f' && condition.valence == 'positive') {
+                data.correct = true;
+            } else if (data.response == 'j' && condition.valence == 'negative') {
+                data.correct = true;
+            } else {
+                data.correct = false;
+            }
+        }
+    }
+    timeline.push(conditionTrial);
+}
 
 
 // Debrief trial
