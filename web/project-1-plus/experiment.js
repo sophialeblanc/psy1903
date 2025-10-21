@@ -30,6 +30,28 @@ let enterFullScreenTrial = {
 
 timeline.push(enterFullScreenTrial);
 
+// ADD GENERAL INSTRUCTIONS SCREEN
+
+let generalInstruct = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+    <h1>Welcome</h1> 
+
+    <p>In this game, you will make a series of choices between a lottery and a sure payout.</p>
+    <p>Each lottery involves guessing which color chip (blue or red) will be drawn from a bag containing both colors in varying proportions.</p>
+    <img src='bag.png'>
+    <p>Colored bars on the screen show how much of each color is in the bag for that round. Example:</p>
+    <img src='images/!!!!!!.png'>
+    <p>Your decisions may affect the amount of reward you receive at the end of the study.</p>
+    <p>Press <span class='key'>SPACE</span> to continue.</>
+    `,
+
+    // Listen for the SPACE key to be pressed to proceed
+    choices: [' '],
+};
+
+timeline.push(generalInstruct);
+
 // Blocks; randomize block order AND order of stimuli within
 
 let randomizedBlocks = jsPsych.randomization.shuffle(conditions);
@@ -41,6 +63,8 @@ for (let block of randomizedBlocks) {
     };
     timeline.push(instructionsTrial);
 
+    // ADD EXAMPLE TRIAL
+
     let randomizedStimuli = jsPsych.randomization.shuffle(block.stimuli);
     for (let stimulus of randomizedStimuli) {
 
@@ -51,8 +75,7 @@ for (let block of randomizedBlocks) {
             choices: "NO_KEYS"
         };
         timeline.push(fixationTrial);
-
-        let choices = jsPsych.randomization.shuffle(["Lottery: draw a chip", "$5"]);
+        let choices = jsPsych.randomization.shuffle(["Draw a chip", "Take the $5"]);
         let conditionTrial = {
             type: jsPsychHtmlButtonResponse,
             stimulus: `<img src=${stimulus.image} width="600">`,
