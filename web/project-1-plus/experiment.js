@@ -42,8 +42,9 @@ let generalInstruct = {
     <img src='img/bag.png'>
     <p>Colored bars on the screen show how much of each color is in the bag for that round.</p>
     <p>Red and blue chips will result in different monetary rewards. You will see the following set-up:</p>
-    <img src='img/barDiagram.png' style='width: 200px;'>
+    <img src='img/barDiagram.png' style='width: 600px;'>
     <p>Your decisions may affect the amount of reward you receive at the end of the study.</p>
+    <p>There will be two series of decision-making tasks.</p>
     <p>Press <span class='key'>SPACE</span> to continue.</>
     `,
 
@@ -231,7 +232,9 @@ let debriefTrial = {
     stimulus: `
     <h1>Thank you!</h1>
     <p>The task you just completed is called an Uncertainty Tolerance Task. In this experiment, we are interested in how people make decisions when the outcome is uncertain.</p>
-    <p>By observing your strategy in this task, we can learn more about how people relate to and cope with uncertainty in different contexts in their lives.</p>
+    <p>You experienced two conditions: uncertain (probabilities known, outcome unknown) and ambiguous (probabilities unknown, outcome unknown).</p>
+    <p>We want to investigate how decisions under these two conditions relate to one's emotional response to uncertainty.</p>
+    <p>By observing your strategy in this task, we can learn more about how people cope with uncertainty in different contexts in their lives.</p>
     <p>Your responses will be combined with those of other participants to help us answer these questions. Individual data will remain confidential.</p>
     <p>Thank you again for your time and contribution.</p>
     `,
