@@ -30,7 +30,7 @@ let enterFullScreenTrial = {
 
 timeline.push(enterFullScreenTrial);
 
-// ADD GENERAL INSTRUCTIONS SCREEN
+// General instructions - all view first regardless of uncertain/ambig order
 
 let generalInstruct = {
     type: jsPsychHtmlKeyboardResponse,
@@ -41,8 +41,8 @@ let generalInstruct = {
     <p>If you choose to lottery, a color chip (blue or red) will be drawn from a bag containing both colors in varying proportions.</p>
     <img src='img/bag.png'>
     <p>Colored bars on the screen show how much of each color is in the bag for that round.</p>
-    <p>Red and blue chips will result in different monetary rewards. Example:</p>
-    <img src='img/barDiagram.png' style='width: 50px;'>
+    <p>Red and blue chips will result in different monetary rewards. You will see the following set-up:</p>
+    <img src='img/barDiagram.jpg' style='width: 50px;'>
     <p>Your decisions may affect the amount of reward you receive at the end of the study.</p>
     <p>Press <span class='key'>SPACE</span> to continue.</>
     `,
