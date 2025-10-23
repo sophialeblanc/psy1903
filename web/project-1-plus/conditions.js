@@ -5,14 +5,22 @@ let conditions = [
     {
         title: 'uncertainBlock',
         instructions: `
-        <h1>In this task series...</h1>
+        <h1>Instructions</h1>
         <p>You’ll see a bag represented by a colored bar showing the proportions of blue and red chips it contains. Example:</p>
-        <img src='img/unc/unc-75-5.png'>
+        <p><img src='img/unc/unc-75-5.png'width="400"></p>
         <p>You can choose to play the lottery (draw a random chip) or take a sure reward of $5.</p>
         <p>If a blue chip is drawn, you earn $0; if a red chip is drawn, you earn the amount shown for that round.</p>
-        <p>For this series of decisions, you will see the exact proportions of blue and red chips in each bag.</p>
+        <p>For this series of decisions, you will see <span class='manipulation'>the exact proportions of blue and red chips</span> in each bag.</p>
         <p>When you are ready, press <span class='key'>SPACE</span> to begin.</>
     `,
+        practiceTrial: `
+        <h1>Practice</h1>
+        <p>Before beginning playing, let's first practice the game</p>
+        <p>In this trial what is the share of red chips in the bag?</p>
+        <p><img src="img/unc/unc-75-8.png" width="600"></p>
+            `,
+        practiceChoices: ["not shown", "75%", "25%"],
+        practiceCorrect: ["75%"],
         stimuli: [
             { image: 'img/unc/unc-75-5.png' },
             { image: 'img/unc/unc-75-8.png' },
@@ -34,15 +42,23 @@ let conditions = [
     {
         title: 'ambiguousBlock',
         instructions: `
-        <h1>In this task series...</h1>
+        <h1>Instructions</h1>
         <p>You’ll see a bag represented by a colored bar showing the proportions of blue and red chips it contains.</p>
-        <p>However, for this series of decisions, you will not see the exact proportions of blue and red chips.</p>
+        <p>However, for this series of decisions, <span class='manipulation'>you will not see the exact proportions of blue and red chips.</span></p>
         <p>A gray bar will cover part of the colored bar to obscure some information about the bag’s contents. Example:</p>
         <img src='img/amb/amb-74-5.png'>
         <p>You can choose to play the lottery (draw a random chip) or take a sure reward of $5.</p>
         <p>If a blue chip is drawn, you earn $0; if a red chip is drawn, you earn the amount shown for that round.</p>
         <p>When you are ready, press <span class='key'>SPACE</span> to begin.</>
     `,
+        practiceTrial: `
+        <h1>Practice</h1>
+        <p>Before beginning playing, let's first practice the game</p>    
+        <p>In this trial what is the exact share of red chips in the bag?</p>
+        <p><img src="img/amb/amb-24-8.png" width="600"></p>
+            `,
+        practiceChoices: ["Not shown", "38", "20"],
+        practiceCorrect: ["Not shown"],
         stimuli: [
             { image: 'img/amb/amb-74-5.png' },
             { image: 'img/amb/amb-74-8.png' },

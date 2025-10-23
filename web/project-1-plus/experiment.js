@@ -3,7 +3,7 @@ let jsPsych = initJsPsych({
 });
 let timeline = [];
 
-// Welcome & consent trial
+// Consent trial
 
 let consentTrial = {
     type: jsPsychHtmlKeyboardResponse,
@@ -35,7 +35,7 @@ timeline.push(enterFullScreenTrial);
 let generalInstruct = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `
-    <h1>Welcome</h1> 
+    <h1>Welcome to the Uncertainty Task!</h1> 
 
     <p>In this game, you will make a series of choices between a lottery and a sure payout of $5.</p>
     <p>If you choose to lottery, a color chip (blue or red) will be drawn from a bag containing both colors in varying proportions.</p>
@@ -61,11 +61,54 @@ let randomizedBlocks = jsPsych.randomization.shuffle(conditions);
 for (let block of randomizedBlocks) {
     let instructionsTrial = {
         type: jsPsychHtmlKeyboardResponse,
-        stimulus: block.instructions
+        stimulus: block.instructions,
+        choices: [' ']
     };
     timeline.push(instructionsTrial);
 
-    // ADD EXAMPLE TRIAL
+    // Example and check
+
+    let compCheckTrial = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: block.practiceTrial,
+        choices: block.practiceChoices,
+        data: { task: 'compCheck' },
+        on_finish: function (data) {
+            let choice_label = block.practiceChoices[data.response];
+            // Compare it to the correct answer string
+            data.correct = (choice_label == block.practiceCorrect);
+        }
+    };
+    let feedback = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: function () {
+            let last_trial = jsPsych.data.get().last(1).values()[0];
+            if (!last_trial.correct) {
+                return "<p style='color:red;'>Try again! What is the share of red chips?</p>";
+            } else {
+                return "<p style='color:green;'>Correct!</p>";
+            }
+        },
+        choices: ["continue"],
+        on_finish: function (data) {
+            let last_trial = jsPsych.data.get().last(2).values()[0]; // check the trial before feedback
+            if (!last_trial.correct) {
+                jsPsych.timelineVariable('repeat', true);
+            }
+        }
+    };
+
+    // Now we make a loop that repeats until they get it right
+
+    let compCheckLoop = {
+        timeline: [compCheckTrial, feedback],
+        loop_function: function () {
+            let last_trial = jsPsych.data.get().last(2).values()[0];
+            return !last_trial.correct; // repeats until correct
+        }
+    };
+
+    timeline.push(compCheckLoop);
 
     let randomizedStimuli = jsPsych.randomization.shuffle(block.stimuli);
     for (let stimulus of randomizedStimuli) {
@@ -102,7 +145,6 @@ let likertInstruct = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `
     <h1>Survey</h1> 
-
     <p>For the final task, you will view a series of statements.</p>
     <p>Please read each of the statements and indicate how much you personally agree or disagree with them.</p>
     <p>Press <span class='key'>SPACE</span> to proceed.</>
