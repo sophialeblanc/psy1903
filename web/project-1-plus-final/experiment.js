@@ -30,7 +30,7 @@ let enterFullScreenTrial = {
 
 timeline.push(enterFullScreenTrial);
 
-// General instructions - all view first regardless of uncertain/ambig order
+// Welcome + General instructions - all view first regardless of uncertain/ambig order
 
 let generalInstruct = {
     type: jsPsychHtmlKeyboardResponse,
@@ -39,12 +39,12 @@ let generalInstruct = {
 
     <p>In this game, you will make a series of choices between a lottery and a sure payout of $5.</p>
     <p>If you choose to lottery, a color chip (blue or red) will be drawn from a bag containing both colors in varying proportions.</p>
-    <img src='img/bag.png'>
+    <img src='img/bag.png' style='width: 600px;'>
     <p>Colored bars on the screen show how much of each color is in the bag for that round.</p>
     <p>Red and blue chips will result in different monetary rewards. You will see the following set-up:</p>
     <img src='img/barDiagram.png' style='width: 600px;'>
     <p>Your decisions may affect the amount of reward you receive at the end of the study.</p>
-    <p>There will be two series of decision-making tasks.</p>
+    <p>There will be two series of decision-making tasks with different instructions.</p>
     <p>Press <span class='key'>SPACE</span> to continue.</>
     `,
 
@@ -273,7 +273,7 @@ let debriefTrial = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `
     <h1>Thank you!</h1>
-    <p>The task you just completed is called an Uncertainty Tolerance Task. In this experiment, we are interested in how people make decisions when the outcome is uncertain.</p>
+    <p>The task you just completed is called an Uncertainty Tolerance Task.</p>
     <p>You experienced two conditions: uncertain (probabilities known, outcome unknown) and ambiguous (probabilities unknown, outcome unknown).</p>
     <p>We want to investigate how decisions under these two conditions relate to one's emotional response to uncertainty.</p>
     <p>By observing your strategy in this task, we can learn more about how people cope with uncertainty in different contexts in their lives.</p>
