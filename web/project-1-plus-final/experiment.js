@@ -39,7 +39,7 @@ let generalInstruct = {
 
     <p>In this game, you will make a series of choices between a lottery and a sure payout of $5.</p>
     <p>If you choose to lottery, a color chip (blue or red) will be drawn from a bag containing both colors in varying proportions.</p>
-    <img src='img/bag.png'>
+    <img src='img/bag.png' style='width: 100px;'>
     <p>Colored bars on the screen show how much of each color is in the bag for that round.</p>
     <p>Red and blue chips will result in different monetary rewards. You will see the following set-up:</p>
     <img src='img/barDiagram.png' style='width: 700px;'>
