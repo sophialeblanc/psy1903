@@ -20,6 +20,7 @@ head(experiment_data)
 ## Check the structure of the dataset
 str(experiment_data)
 ```
+
 #### Q2: Functions ------------------------------------------------
 
 ```{r}
@@ -46,6 +47,142 @@ classify_rt <- function(rt, threshold = 500) {
       ifelse(rt < threshold, "Fast", "Slow")
   ))
 }
+
+```
+
+#### Q3: Loops vs. Vectorization ---------------------------------------------
+
+```{r}
+
+experiment_data$age <- NA ## new column of NAs
+
+getRandomNumber <- function(min, max) {
+  sample(min:max, 1)
+}
+
+for(i in 1:nrow(experiment_data)) {
+  experiment_data[i, "age"] <-getRandomNumber(18,65)
+}
+
+head(experiment_data)
+
+experiment_data$age <- sample(18:65, nrow(experiment_data), replace = TRUE)
+
+## applies sample function to each row of dataset to fill in age column
+
+head(experiment_data)
+
+```
+
+#### Q4: Control Structures on Data Frames ---------------------------
+
+```{r}
+for(i in 1:nrow(experiment_data)) {
+   experiment_data$rt_category_loop[i] <- classify_rt(experiment_data$rt[i])
+}
+
+experiment_data$rt_category_vec <- classify_rt(experiment_data$rt)
+
+## The classify function is already vectorized, as it employs ifelse within. Thanks to AI for helping clarify that logic when I was over-complicating it.
+
+table(loop = experiment_data$rt_category_loop,
+      vec  = experiment_data$rt_category_vec,
+      useNA = "ifany")
+
+```
+
+#### Q5: Debugging Functions -----------------------------
+
+```{r}
+## Create Buggy Function
+threshold <- 500
+
+flag_fast <- function(rt_vector) {
+  rt_vector < threshold
+}
+
+flag_fast(experiment_data$rt)
+
+rm(threshold)
+
+## Above is the code with bug, below is corrected to ensure not reliant on object, threshold is locally defined
+
+flag_fast <- function(rt_vector) {
+  threshold <- 500
+  rt_vector < threshold
+}
+
+```
+
+#### Q6: Debugging Tools in Action -----------------------------
+
+```{r}
+subject_means <- tapply(experiment_data$rt,
+                        experiment_data$condition,
+                        mean)
+print(paste("Mean for control:", subject_means["control"]))
+print(paste("Mean for incongruent:", subject_means["incongruent"]))
+
+# How many NAs overall?
+sum(is.na(experiment_data$rt))
+
+# How many NAs by condition?
+tapply(is.na(experiment_data$rt), experiment_data$condition, sum)
+
+# Optional: quick sanity checks
+summary(experiment_data$rt)
+with(experiment_data, table(condition, is.na(rt)))
+
+## editing code to ignore missing values:
+
+subject_means <- tapply(experiment_data$rt,
+                        experiment_data$condition,
+                        mean, na.rm = TRUE)
+print(paste("Mean for control:", subject_means["control"]))
+print(paste("Mean for incongruent:", subject_means["incongruent"]))
+
+```
+
+#### Q7: Using AI for Debugging or Refactoring -----------------------
+
+```{r}
+## code with (intentional) bug
+
+## subject_means <- tapply(experiment_data$rt[!is.na(experiment_data$rt)], experiment_data$condition, mean)
+
+## ChatGPT revised, final working code:
+
+subject_means <- tapply(
+  experiment_data$rt, 
+  experiment_data$condition, 
+  mean, 
+  na.rm = TRUE
+)
+
+```
+
+AI reflection:
+
+- I used ChatGPT. To begin, they did a good job of breaking down the errors and how to fix them into comprehensible steps. They first explained the error itself, in very graspable language for a beginner coder, I think. I like that I first got to understand the logic/reasoning of what was going on (i.e., column length mismatch). ChatGPT even reiterated/summarized main points as it went (e.g., concisely restating the problem). ChatGPT provided revised code and thoroughly explained the changes; their logic aligned with my understanding, like how tapply can apply na.rm = TRUE to rows overall. This explanation was more brief, and I could've asked more questions if I needed to. ChatGPT was also effective at giving alternatives and optional improvements. In one suggestion, I appreciated that they created a NEW cleaned dataset instead of revising the original, which is best practice.
+
+- I changed my code to the "correct approach" after ensuring I understood the changes that were being made. I removed the subsetting and added the na.rm conditional to be applied through tapply. I decided not to implement the data cleaning and the dplyr version as they are unnecessary at this point.
+
+- I executed the revised code to ensure it worked properly. Looking at my global environment, I can see that the value "subject_means" was effectively created, and there are two numbers assigned to it: 511 and 539. There are no NAs seen, so they must have been ignored as intended in the calculation.
+
+#### Q8: Saving and Reloading Objects -----------------------------
+
+```{r}
+
+saveRDS(experiment_data, file = "../data/cleaned/experiment_data.rds")
+write.csv(experiment_data, file = "../data/cleaned/experiment_data.csv")
+
+save(experiment_data, subject_means, file = "../data/cleaned/objects.RData")
+
+rm(list = ls())
+
+experiment_data_csv <- read.csv("../data/cleaned/experiment_data.csv")
+experiment_data_rds <- readRDS("../data/cleaned/experiment_data.rds")
+load("../data/cleaned/objects.RData")
 
 ```
 
