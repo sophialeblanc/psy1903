@@ -1,0 +1,194 @@
+---
+title: "Grouping and Summarizing Across Participants"
+format: html
+execute:
+  echo: true
+  warning: true
+  message: false
+---
+
+#### Load and Inspect Group Level Data Data
+```{r}
+# Load here::here robustly
+if (!require(here)) install.packages("here")
+library(here)
+
+# Load the study-level dataset built in our previous workflow
+study_level <- read.csv(here("data/cleaned/study_level.csv"))
+
+# Quick inspection
+head(study_level)
+str(study_level)
+summary(study_level)
+```
+
+```{r}
+## Replace Column Names
+names(study_level) <- c("subject_id", "tef10_score", "practice_mean_rt", "practice_acc", "magnitude_mean_rt", "magnitude_acc", "parity_mean_rt", "parity_acc", "practice_sd_rt", "magnitude_sd_rt", "parity_sd_rt")
+write.csv(study_level, here::here("data/cleaned/study_level.csv"), row.names = FALSE)
+```
+
+#### Calculate Difference Scores
+```{r}
+# A) Reaction time difference (complete this line together)
+# hint: subtract magnitude mean RT from parity mean RT
+study_level$rt_diff <- study_level$parity_mean_rt - study_level$magnitude_mean_rt
+
+# B) Accuracy difference (complete together)
+study_level$acc_diff <- study_level$parity_acc - study_level$magnitude_acc
+
+# C) Overall averages across conditions
+study_level$mean_rt_overall  <- rowMeans(
+  study_level[, c("magnitude_mean_rt", "parity_mean_rt")],
+  na.rm = TRUE
+)
+
+## ^ for all rows, focuses on averaging two columns, combined w c
+
+study_level$mean_acc_overall <- rowMeans(
+  study_level[, c("magnitude_acc", "parity_acc")],
+  na.rm = TRUE
+)
+
+# Peek at the new columns
+head(study_level[, c("subject_id", "rt_diff", "acc_diff",
+                     "mean_rt_overall", "mean_acc_overall")])
+```
+
+#### Summarize Across Participants
+```{r}
+# Class-level means
+colMeans(study_level[, c("magnitude_mean_rt",
+                         "parity_mean_rt",
+                         "rt_diff")],
+         na.rm = TRUE)
+
+## ^ takes avg for a given column across the rows, so here total avg of these 3 columns across all rows
+
+# Class-level variability (standard deviations)
+sapply(study_level[, c("magnitude_mean_rt",
+                       "parity_mean_rt",
+                       "rt_diff")],
+       sd, na.rm = TRUE)
+
+## ^ apply sd to three columns & remove NAs
+
+```
+
+
+Parity mean RT is `r round(mean(study_level$parity_mean_rt, na.rm = TRUE), 2)` ms, plus or minus `r round(sd(study_level$parity_mean_rt, na.rm = TRUE), 2)` ms.
+
+#### Grouping using aggregate
+```{r}
+# Create a focus grouping variable from tef10_score
+focus_cut <- mean(study_level$tef10_score, na.rm = TRUE)
+study_level$focus_group <- ifelse(study_level$tef10_score >= focus_cut,
+                                  "High Focus", "Low Focus")
+
+# Check group counts
+table(study_level$focus_group)
+
+# Aggregate reaction times and differences by focus group
+rt_by_focus <- aggregate(
+  study_level[, c("magnitude_mean_rt",
+                  "parity_mean_rt",
+                  "rt_diff")],
+  by = list(Focus = study_level$focus_group),
+  FUN = mean
+)
+rt_by_focus
+
+# Aggregate accuracies and differences by focus group
+acc_by_focus <- aggregate(
+  study_level[, c("magnitude_acc",
+                  "parity_acc",
+                  "acc_diff")],
+  by = list(Focus = study_level$focus_group),
+  FUN = mean
+)
+acc_by_focus
+
+str(study_level)
+# What do we notice here?
+
+```
+For High Focus participants, parity mean RT is approximately `r {
+hf <- subset(study_level, focus_group == "High Focus");
+round(mean(hf$parity_mean_rt, na.rm = TRUE), 2) }` ms, plus or minus `r {
+hf <- subset(study_level, focus_group == "High Focus");
+round(sd(hf$parity_mean_rt, na.rm = TRUE), 2) }` ms.
+For Low Focus participants, parity mean RT is approximately `r {
+lf <- subset(study_level, focus_group == "Low Focus");
+round(mean(lf$parity_mean_rt, na.rm = TRUE), 2) }` ms, plus or minus `r {
+lf <- subset(study_level, focus_group == "Low Focus");
+round(sd(lf$parity_mean_rt, na.rm = TRUE), 2) }` ms.
+
+This is a mean difference of `r round(
+  mean(study_level$parity_mean_rt[study_level$focus_group == "High Focus"], na.rm = TRUE) -
+  mean(study_level$parity_mean_rt[study_level$focus_group == "Low Focus"], na.rm = TRUE),
+  2
+)` ms between the High and Low focus group on the parity trials.
+
+For High Focus participants, magnitude mean RT is approximately `r {
+hf <- subset(study_level, focus_group == "High Focus");
+round(mean(hf$magnitude_mean_rt, na.rm = TRUE), 2) }` ms, plus or minus `r {
+hf <- subset(study_level, focus_group == "High Focus");
+round(sd(hf$magnitude_mean_rt, na.rm = TRUE), 2) }` ms.
+For Low Focus participants, magnitude mean RT is approximately `r {
+lf <- subset(study_level, focus_group == "Low Focus");
+round(mean(lf$magnitude_mean_rt, na.rm = TRUE), 2) }` ms, plus or minus `r {
+lf <- subset(study_level, focus_group == "Low Focus");
+round(sd(lf$magnitude_mean_rt, na.rm = TRUE), 2) }` ms.
+
+This is a mean difference of `r round(
+  mean(study_level$magnitude_mean_rt[study_level$focus_group == "High Focus"], na.rm = TRUE) -
+  mean(study_level$magnitude_mean_rt[study_level$focus_group == "Low Focus"], na.rm = TRUE),
+  2
+)` ms between the High and Low focus group on the magnitude trials.
+
+#### Exploring and Interpreting
+```{r}
+# Summaries for key variables
+summary(study_level[, c("magnitude_mean_rt",
+                        "parity_mean_rt",
+                        "rt_diff",
+                        "magnitude_acc",
+                        "parity_acc",
+                        "acc_diff")])
+
+# Optional exploration: association between overall RT and overall accuracy
+cor(study_level$mean_rt_overall, study_level$mean_acc_overall, use = "complete.obs")
+```
+
+#### Save Files
+```{r}
+# Make an output directory for tables if needed
+dir.create(here("output/tables"), recursive = TRUE, showWarnings = FALSE)
+
+# Build a compact one-row table of overall means and SDs
+group_summary <- data.frame(
+  mean_magnitude_rt = mean(study_level$magnitude_mean_rt, na.rm = TRUE),
+  mean_parity_rt    = mean(study_level$parity_mean_rt,    na.rm = TRUE),
+  mean_rt_diff      = mean(study_level$rt_diff,                    na.rm = TRUE),
+  sd_magnitude_rt   = sd(study_level$magnitude_mean_rt,   na.rm = TRUE),
+  sd_parity_rt      = sd(study_level$parity_mean_rt,      na.rm = TRUE),
+  sd_rt_diff        = sd(study_level$rt_diff,                      na.rm = TRUE)
+)
+
+# Preview and save
+group_summary
+
+write.csv(group_summary, here("output/tables/group_summary.csv"), row.names = FALSE)
+saveRDS(group_summary, here("output/tables/group_summary.rds"))
+
+# Confirm
+file.exists(here("output/tables/group_summary.csv"))
+```
+
+```{r}
+# Check for missing values
+anyNA(study_level)
+
+# Check number of participants
+nrow(study_level)
+```
