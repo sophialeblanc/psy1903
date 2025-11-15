@@ -1,0 +1,82 @@
+---
+title: "W11 Taskset: Emotional Stroop"
+author: "Sophia LeBlanc"
+format: html
+execute:
+  echo: true
+  warning: true
+  message: false
+---
+
+#### Workflow Summary -------------------------------
+
+In this `.qmd`, my workflow begins with calling in necessary packages and loading applicable functions. `process_participant` sources the other functions within itself, so it is the only function I explicitly call here. I find my data files and subsequently apply `process_participant` to them. 
+
+Within `process_participant`, I extract subject IDs, read in `.csv`s, implement column correction checks, source my other functions, and apply those functions before combining select outputs in a new, clean dataframe.
+
++ The `compute_rt_if_missing` function calculates RTs utilizing onset and response timepoints if the RT is missing.
+
++ `summarize_behavior` converts accuracy data to logical, helps filter to correct trials, and calculates related accuracy and rt means.
+
++ `score_questionnaire` converts the json string into interpretable, numeric data. This function also involves reverse scoring some items to allow us to properly analyse the data. 
+
+Overall, this `.qmd` utilizes the modularized workflow to scale up the functions to cover several files of participant data and combine participant rows into a table.
+
+#### Handling Missing Data -------------------------------
+
+In `compute_rt_if_missing`, I salvaged participant data (that may have otherwise been excluded & lowered the sample size): If the data had response and start/end timepoints, I could calculate response time if it was missing. True missing trials (NA for rt, response, and correct) were excluded to prevent issues with calculating RT and determining if the trial was accurate, thus improving reproducibility and data quality. 
+
+#### Concept Check -------------------------------
+
++ Q1: What does `source("scripts/score_questionnaire.R")` enable in your workflow?
+    + `source()` helps us literally "source" R scripts into our Quarto file. We used our script files as toolkits to hold functions; now, we are loading functions through source into the QMD file. The functions from our scripts are then available for our use in Quarto. In this case, the score_questionnaire function becomes available for use.
++ Q2: Why is modularizing your code into multiple scripts considered a best practice?
+    + Modularizing helps make our code more clear, comprehensible, and easier to use for reproducibility's sake. By splitting into different scripts and documents, we can be more intentional with our code and identify specific purposes/functions per script. There's also the benefit of a cleaner, more organized workspace. We can also reuse the code/logic in our components across different data and multiple files, granting us scalability. A Quarto report, which may dynamically interact with/source different R scripts, can bring our components together in an understandable, reproducible workflow. This report almost works like a narrative that can be retold among researchers. 
++ Q3: What information does `traceback()` provide after an error?
+  + `traceback()` provides information about where the error occurred. Specifically, the command reports the previous call sequence leading up to the error, so you don't have to do the searching yourself. You can more easily identify the place/call and related steps that led to the error.
++ Q4: When you read multiple `.csv` files into R, how can using `str()` or `names()` before combining them help you prevent or debug errors later in your workflow?
+  + `str()` or `names()` are very helpful commands to help catch errors early, which prevent errors and further complications later on (i.e., when trying to perform data manipulation or analysis). These are both ways to "inspect" the data and ensure it loads as expected. `str()` checks the data's structure (e.g., column types, # of obs and variables, data types, preview of data). `names()` provides the column/variable names. So, overall, using these checks can determine if files we're seeking to combine have the same number of columns, the same column names, and/or the same data types per column to ensure successful data merging. We can make necessary changes (e.g., renaming columns, converting data types) before moving forward.
++ Q5: How can you check whether your function actually loaded correctly into your environment, and why is this step important before calling it in later code?
+  + One strategy is to clear the environment and start fresh to see if the code can run independently (determine if the script is dependent on 'leftover' objects). The code itself may need to be changed to be relative. Commands are helpful tools: `ls()` or `objects()` can list variables/objects in the environment, `environment()` can check where functions are running, or you can call the function and use `print()` to ensure the input/output values are as intended, confirming the function's efficacy. This step is extremely important to preserve reproducibility. We should make sure the function is operating correctly and independently before calling it for later use. 
+  
+#### Flitering & Computing RTs on Correct Trials
+
++ Why do we filter RTs to 300–900 ms and compute RTs on correct trials only?
+  + We filter RTs to a specific speed range to exclude outlier values, and we compute correct trials to ensure we are working with RT values representing accurate Emotional Stroop responses. We want to investigate emotional inference which may be shown in differences in response time across correct trials (i.e., was there a delay in getting to the correct answer?); including inaccurate trials may introduce other confounds that don't represent biases.
+  
+#### CODE BEGINS -------------------------------
+  
+#### Call in packages -------------------------------
+
+```{r}
+library(jsonlite)
+```
+
+#### Load functions -------------------------------------------------------------
+  
+```{r}
+
+source(here::here("scripts","process_participant.R"))
+
+```
+  
+#### Find files -------------------------------------------------------------
+```{r}
+# Prefer a pattern to avoid accidentally pulling other CSVs
+file_list <- list.files(here::here("data","raw"), pattern = "^est-experiment-.*\\.csv$", full.names = TRUE)
+```
+
+#### Apply our participant processor ---------------------------------------
+```{r}
+participant_rows <- lapply(file_list, process_participant)
+```
+
+#### Combine into one study-level data frame --------------------------------
+```{r}
+study_level <- do.call(rbind, participant_rows)
+
+print(study_level)
+
+```
+
+The `mean` RT across the study is `r round(mean(study_level$mean_rt_correct, na.rm = TRUE),2)` ms, and the `mean` accuracy is `r round(mean(study_level$mean_accuracy, na.rm = TRUE),2)`.
