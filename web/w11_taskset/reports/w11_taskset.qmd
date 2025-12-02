@@ -73,6 +73,7 @@ participant_rows <- lapply(file_list, process_participant)
 
 #### Combine into one study-level data frame --------------------------------
 ```{r}
+
 study_level <- do.call(rbind, participant_rows)
 
 print(study_level)

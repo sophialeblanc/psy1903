@@ -183,6 +183,9 @@ saveRDS(group_summary, here("output/tables/group_summary.rds"))
 
 # Confirm
 file.exists(here("output/tables/group_summary.csv"))
+
+## write.csv(study_level, here("data/cleaned/study_level_processed.csv"), row.names = FALSE)
+## saveRDS(study_level, here("data/cleaned/study_level_processed.rds"))
 ```
 
 ```{r}
