@@ -76,12 +76,12 @@ ul.task-list li input[type="checkbox"] {
 <ul>
 <li>Initially, I identified places to refactor based on opportunities for indexing by best practices and writing vectorized code. There were some places where indexing was especially susceptible to error if the data were to undergo any editing/manipulation. Further, there were areas of code that were excessively long and slow; particularly, for loops function to explicitly operate on elements one-by-one. The code would benefit from vectorized versions that involve shorter, faster code that automatically applies-all. Clarity and efficiency would result.
 <ul>
-<li>In <code>summarize_behavior.R</code>, a section of code was indexed by position, which left the code vulnerable to changes in data order. Indexing by name is more reliable, readable, and resilient to order changes. I re-wrote the code as such:
+<li>In <code>summarize_behavior.R</code>, a section of code was indexed by position, which left the code vulnerable to changes in data order. Indexing by name is more reliable, readable, and resilient to order changes. I also replaced hardcoded values with placeholders to adapt to upper/lower limit changes. I re-wrote the code as such:
 <ul>
 <li>Initial: <code>valid_data_rt &lt;- data[data[ , 3] &gt;= 300 &amp; data[ , 3] &lt;= 900 &amp; data[ , 12] == TRUE, ]</code></li>
-<li>Re-write: <code>valid_data_rt &lt;- data[data$rt &gt;= 300 &amp; data$rt &lt;= 900 &amp; data$correct == TRUE, ]</code></li>
+<li>Rewrite: <code>valid_data_rt &lt;- data[data$rt &gt;= rt_min &amp; data$rt &lt;= rt_max &amp; data$correct == TRUE, ]</code></li>
 <li>Initial: <code>valid_data_acc &lt;- data[data[ , 3] &gt;= 300 &amp; data[ , 3] &lt;= 900, ]</code></li>
-<li>Re-write: <code>valid_data_acc &lt;- data[data$rt &gt;= 300 &amp; data$rt &lt;= 900, ]</code></li>
+<li>Re-write: <code>valid_data_acc &lt;- data[data$rt &gt;= rt_min &amp; data$rt &lt;= rt_max, ]</code></li>
 </ul></li>
 <li>Also in <code>summarize_behavior.R</code>, there was a for loop performing calculations inefficiently, row-by-row. My vectorized version applied the same calculation to an entire column:
 <ul>
