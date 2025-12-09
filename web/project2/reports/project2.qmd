@@ -274,11 +274,89 @@ text(x = min(d_vals, na.rm = TRUE),
 
 *Your Task: Recreate the above base R plots with ggplot2. Improve the overall aesthetic (axes, labels/titles, color, etc.) using a custom theme. Don't forget to save your plots.*
 
+Distribution of IAT D-scores
 ```{r}
 ## TODO: Use ggplot2 to re-create:
   ## (1) histogram of D-scores and 
+
+theme_iat <- theme_classic() +
+  theme(
+    plot.title   = element_text(size = 16, face = "bold", color = "purple", hjust = 0.5),
+    axis.title   = element_text(size = 12, face = "bold", color = "darkblue"),
+    axis.text    = element_text(size = 10),
+    legend.title = element_text(size = 10, face = "bold", color = "black"),
+    legend.text  = element_text(size = 8),
+    legend.position = "bottom"
+  )
+  
+#| label: fig-dscore-hist-lines
+#| fig-cap: "Histogram of D-scores with reference lines showing the mean and one standard deviation."
+
+  d_mean <- mean(participant_wide$d_score, na.rm = TRUE)
+  d_sd   <- sd(participant_wide$d_score,  na.rm = TRUE)
+  
+  histplot <- ggplot(participant_wide, aes(x = d_score)) +
+  geom_histogram(binwidth = .1,
+                 fill = "gray80",
+                 color = "black") +
+  geom_vline(xintercept = d_mean, color = "red") +
+  geom_vline(xintercept = d_mean - d_sd, color = "blue", linetype = "dashed") +
+  geom_vline(xintercept = d_mean + d_sd, color = "blue", linetype = "dashed") +
+  labs(title = "Distribution of IAT D-scores", x = "D-score (ms)", y = "Count") +
+  theme_iat
+
+  print(histplot)
+  
+```
+
+```{r}
   ## (2) bar plot of mean RTs. Include standard error bars.
+
+participant_long <- reshape(
+  participant_wide,
+  varying = list(c("congruent_mean", "incongruent_mean")),
+  v.names = "rt_value",
+  timevar = "condition",
+  times = c("Congruent", "Incongruent"),
+  idvar = "subject_id",
+  direction = "long"
+)
+
+#| label: fig-rt-bar
+#| fig-cap: "Mean reaction times for congruent and incongruent trials."
+
+barplot <- ggplot(participant_long, aes(x = condition, y = rt_value, fill = condition)) +
+  stat_summary(fun = mean, geom = "bar", color = "black") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  labs(title = "Bar Plot of Mean RTs", x = "Condition", y = "Mean RT (ms)") +
+  scale_fill_manual(values = c("steelblue", "lightgreen")) +
+  theme_iat
+
+print(barplot)
+
+```
+
+Scatterplot with Regression Line
+```{r}
   ## (3) correlation between anxiety score and d-scores, with regression line
+
+#| label: fig-dscore-anx-scat
+#| fig-cap: "Correlation Between D-score and Anxiety."
+
+d_vals  <- participant_wide$d_score
+anx_vals <- participant_wide$anxiety_score
+
+cor_test <- cor.test(d_vals,
+                     anx_vals)
+
+scatplot <- ggplot(participant_wide, aes(x = d_score, y = anxiety_score)) +
+  geom_point(color = "gray40") +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Correlation Between Anxiety Scores and D-Scores", x = "D-score",
+       y = "Anxiety score") +
+  theme_iat
+
+print(scatplot)
 ## Improve the overall aesthetic (axes, labels/titles, color, etc.) using a custom theme.
 ## Use fig-cap to provide captions for each figure.
 ## You will want to assign each plot to a variable for later saving (e.g., barplot <- ggplot...)
@@ -306,6 +384,27 @@ Save ggplots plots.
 ```{r}
 ## Remember that the plots do **not** save automatically. Use `ggplot2::ggsave()` to save each plot, for example:
 ## ggsave("my_plot.png", my_plot_object, path = here::here("outputs", "plots"))
+
+ggsave(
+  filename = here::here("outputs", "plots", "hist_dscores.png"),
+  plot     = histplot,
+  width    = 6,
+  height   = 4
+)
+
+ggsave(
+  filename = here::here("outputs", "plots", "bar_rts.png"),
+  plot     = barplot,
+  width    = 6,
+  height   = 4
+)
+
+ggsave(
+  filename = here::here("outputs", "plots", "corr_anx_dscore.png"),
+  plot     = scatplot,
+  width    = 6,
+  height   = 4
+)
 
 "Saved ggplot outputs."
 ```

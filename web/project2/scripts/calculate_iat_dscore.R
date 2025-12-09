@@ -18,8 +18,11 @@ calculate_iat_dscore <- function(test_df) {
   ## Group trials by the category displayed
   desired_order <- c(
     "nature or serenity or school or anxiety", # congruent
-    "nature or anxiety or school and serenity"  # incongruent
+    "nature or anxiety or school or serenity"  # incongruent
   )
+  
+  ## CORRECTION: Typo above^^, initially read "and serenity" when should be "or serenity"
+  
   grp <- factor(
     test_df$expectedCategoryAsDisplayed,
     levels = desired_order

@@ -25,10 +25,17 @@ import_and_process <- function(file_name) {
   ## If this fails, write code using if(), %in%, and names() to rename any 
   ## mismatched column names reproducibly every time you render from the raw data
   
-  required_cols <- c("trialType", "block", "rt", "response", "trial_index",
+ required_cols <- c("trialType", "block", "rt", "response", "trial_index",
   "time_elapsed", "word", "expectedCategory",
   "expectedCategoryAsDisplayed", "leftCategory", "rightCategory",
   "correct", "question_order")
+ 
+ names(df)[names(df) == "trial_type"] <- "trialType"
+ names(df)[names(df) == "expectedCategoryDisplayed"] <- "expectedCategoryAsDisplayed"
+  
+  ## CORRECTION: Looking for column "trialType", but some participant data has column "trial_type",
+  ## so added line above to correct
+  ## same with expectedCategoryDisplayed and expectedCategoryAsDisplayed
   
   # Don't refactor to ifelse() - later when doing the AI comparison, you can ask why
   if (!all(required_cols %in% names(df))) {
@@ -55,10 +62,12 @@ import_and_process <- function(file_name) {
   
   #### Subset questionnaire vs. task -------------------------------------------
   task_df <- df[df$trialType == "iat", , drop = FALSE]
-  questionnaire_df <- df[df$trialType == "questionnaire", , drop = FALSE]
+  questionnaire_df <- df[df$trialType == "Questionnaire", , drop = FALSE]
   if (nrow(questionnaire_df) != 1) {
     warning("Empty 'questionnaire_df' where data expected. In future steps, 'score_questionnaire' will not run correctly.")
   }
+  
+  ## CORRECTION: Typo above^^, initially read "questionnaire" when should be "Questionnaire"
   
   #### Calculate Behavior & Questionnaire Scores -------------------------------
   behavior <- summarize_behavior(task_df)
@@ -83,7 +92,6 @@ import_and_process <- function(file_name) {
     d_score = behavior["d_score"],
     row.names = NULL
   )
-  
   
   ## Save summary CSV to cleaned/participants
   write.csv(

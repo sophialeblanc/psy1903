@@ -23,9 +23,11 @@
 ## json_string <- questionnaire_df$response; reverse <- c(2, 5); scale_min <- 1L; scale_max <- 5L
 
 score_questionnaire <- function(json_string, 
-                                reverse = c(12, 5), 
+                                reverse = c(2, 5), 
                                 scale_min = 1L, 
                                 scale_max = 5L) {
+  
+  ## CORRECTION: Typo above^^, read initially as c(12, 5) when should be c(2, 5)
   
   ## 1) If the JSON string is missing or empty, return a numeric NA
   if (is.null(json_string) || is.na(json_string) || !nzchar(json_string)) {
@@ -37,9 +39,11 @@ score_questionnaire <- function(json_string,
   responses <- jsonlite::fromJSON(as.character(json_string))
   
   ## 3) Flatten and convert to numeric
-  responses[sapply(response, is.null)] <- NA
+  responses[sapply(responses, is.null)] <- NA
   responses <- unlist(responses)
   responses <- as.numeric(responses)
+  
+  ## CORRECTION: Typo above^^, initially read as sapply(response,is.null) when should be "responses", plural
   
   ## 4) If reverse is provided, it must reference valid item positions
   if (length(reverse) > 0) {

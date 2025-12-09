@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Sophia LeBlanc">
+
+<title>Project 2 — Part 3: AI Refactor</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="ai-refactor_files/libs/clipboard/clipboard.min.js"></script>
+<script src="ai-refactor_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="ai-refactor_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="ai-refactor_files/libs/quarto-html/popper.min.js"></script>
+<script src="ai-refactor_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="ai-refactor_files/libs/quarto-html/anchor.min.js"></script>
+<link href="ai-refactor_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="ai-refactor_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="ai-refactor_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="ai-refactor_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="ai-refactor_files/libs/bootstrap/bootstrap-81267100e462c21b3d6c0d5bf76a3417.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Project 2 — Part 3: AI Refactor</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Sophia LeBlanc </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="my-comparison-report" class="level3">
+<h3 class="anchored" data-anchor-id="my-comparison-report">My Comparison Report</h3>
+<p>Original Issues &amp; Refactoring</p>
+<ul>
+<li>Initially, I identified places to refactor based on opportunities for indexing by best practices and writing vectorized code. There were some places where indexing was especially susceptible to error if the data were to undergo any editing/manipulation. Further, there were areas of code that were excessively long and slow; particularly, for loops function to explicitly operate on elements one-by-one. The code would benefit from vectorized versions that involve shorter, faster code that automatically applies-all. Clarity and efficiency would result.
+<ul>
+<li>In <code>summarize_behavior.R</code>, a section of code was indexed by position, which left the code vulnerable to changes in data order. Indexing by name is more reliable, readable, and resilient to order changes. I re-wrote the code as such:
+<ul>
+<li>Initial: <code>valid_data_rt &lt;- data[data[ , 3] &gt;= 300 &amp; data[ , 3] &lt;= 900 &amp; data[ , 12] == TRUE, ]</code></li>
+<li>Re-write: <code>valid_data_rt &lt;- data[data$rt &gt;= 300 &amp; data$rt &lt;= 900 &amp; data$correct == TRUE, ]</code></li>
+<li>Initial: <code>valid_data_acc &lt;- data[data[ , 3] &gt;= 300 &amp; data[ , 3] &lt;= 900, ]</code></li>
+<li>Re-write: <code>valid_data_acc &lt;- data[data$rt &gt;= 300 &amp; data$rt &lt;= 900, ]</code></li>
+</ul></li>
+<li>Also in <code>summarize_behavior.R</code>, there was a for loop performing calculations inefficiently, row-by-row. My vectorized version applied the same calculation to an entire column:
+<ul>
+<li>Initial: <code>for (i in 1:nrow(valid_data_rt)) { valid_data_rt$rt_centered[i] &lt;- valid_data_rt$rt[i] - mean(valid_data_rt$rt, na.rm = TRUE) }</code></li>
+<li>Re-write: <code>valid_data_rt$rt_centered &lt;- valid_data_rt$rt - mean(valid_data_rt$rt, na.rm = TRUE)</code></li>
+</ul></li>
+<li>Finally, in <code>build_participant_wide.R</code>, there was also a for loop occupying several lines of code, applying a function to elements of a list one-by-one. Using lapply, I condensed this code to one line; it applies the same function to all elements in a list and returns the results:
+<ul>
+<li>Initial: <code>rows &lt;- list() for (i in seq_along(files)) { file_name &lt;- files[i] rows[[i]] &lt;- import_and_process(file_name) }</code></li>
+<li>Re-write: <code>rows &lt;- lapply(files, import_and_process)</code></li>
+</ul></li>
+</ul></li>
+<li>For me and my coding familiarity, these seemed to be the most urgent and identifiable places for refactoring.</li>
+</ul>
+<p>Optimization Ideas from AI for the Unedited Project (See “Full Documentation” for more detail)</p>
+<ul>
+<li>Reduce Repeated File-Reading / Validation Logic: Create helper functions and place in <code>utils.R</code></li>
+<li>Vectorize Where Possible Instead of Multiple <code>apply()</code> Layers</li>
+<li>Consolidate Regex-Based ID Extraction</li>
+<li>Use <code>aggregate()</code> or <code>tapply()</code> More Consistently: In several places, the code manually loops to compute participant-level or condition-level summaries.</li>
+<li>Improve Error Messages and Input Validation</li>
+<li>Avoid Repeated Path Constructions</li>
+<li>Prefer <code>seq_len(n)</code> to <code>1:n</code></li>
+<li>Use <code>isTRUE()</code> When Checking Logical Columns</li>
+<li>Use <code>rowMeans()</code> for computing D-scores: In <code>calculate_iat_dscore.R</code>, the D-score computation often uses manual mean calculations.</li>
+<li>Break Long Scripts into Smaller Functions</li>
+<li>Add Documentation at the Function Level: You have some descriptions in comments, but consider using a consistent template</li>
+<li>Use Consistent Naming Conventions</li>
+<li>Optional Tidyverse Improvements
+<ul>
+<li>Replace <code>apply/aggregate</code> with <code>group_by</code> + <code>summarize</code></li>
+<li>Use <code>readr</code> instead of <code>read.csv</code></li>
+<li>Use <code>stringr</code> for cleaner ID extraction</li>
+<li>Use <code>purrr</code> for iterating over files</li>
+</ul></li>
+</ul>
+<p>Optimization Ideas from AI for my Refactored Project</p>
+<ul>
+<li>Create <code>utils.R</code> to consolidate truly repeated logic (create and store repeated functions here)</li>
+<li>Split <code>import_and_process()</code> into 3 focused helper functions</li>
+<li>Standardize naming conventions across the whole project</li>
+<li>Replace repeated <code>subset(df, ...)</code> with indexed filters</li>
+<li>Remove <code>stringsAsFactors = FALSE</code> everywhere (it’s already default)</li>
+<li>Use rowwise vectorization instead of apply-inside-apply patterns</li>
+<li>Check for required columns in one place, not repeatedly</li>
+<li>Use <code>file.path()</code> uniformly rather than mixing with <code>paste0</code></li>
+<li>Deduplicate D-score computation and put it in <code>calculate_iat_dscore.R</code></li>
+<li>Use clearer data-frame construction for final summary rows</li>
+<li>Add optional message/reporting flags</li>
+</ul>
+<p>Comparison &amp; Reflection</p>
+<ul>
+<li>Similarities
+<ul>
+<li>AI noted the importance of vectorizing where possible and avoiding manual loops
+<ul>
+<li>Similarly, I was on the look-out for these improvements; I eliminated two manual loops.</li>
+<li>AI and I both emphasized transitions from manual to automatic</li>
+<li>However, AI seemed to point to different examples (e.g., nested <code>apply()</code>) than I worked on, so there are likely more areas where this is applicable, beyond my changes. Still, the concept is similar.</li>
+</ul></li>
+<li>AI noted that <code>subset()</code> may be replaced with name-indexing, although this was oddly only mentioned for my refactored code. I similarly converted to indexing practices by name, but in a different area of the code that was indexing by position. I can apply this logic to other areas.</li>
+<li>AI also recommended to avoid repeated path constructions. While my refactoring did not include this, I will say this was in-mind conceptually and related to my de-bugging, too. Class taught us the importance of relative paths, awareness of working directories, etc.
+<ul>
+<li>Consistent naming conventions was another recommendation that related more to my de-bugging but can still be improved upon even when functionality is reached.</li>
+</ul></li>
+</ul></li>
+<li>Differences
+<ul>
+<li>Overall, AI suggested several modifications that, to be honest, weren’t on my radar when I was searching for points of needed improvement.
+<ul>
+<li>Some recommendations were quite advanced, beyond what I could fully comprehend (e.g., function-level documentation, Tidyverse)</li>
+<li>The recommendations generally felt more advanced and detail-oriented, whereas the changes I implemented felt more obvious and urgent</li>
+</ul></li>
+<li>AI suggested overarching structural changes, which is far beyond the scope I had considered. I was focused on the direct code I was reading, but it’s important to also zoom out.
+<ul>
+<li>Examples: creating new helper functions, creating <code>utils.R</code> to store them, breaking scripts into smaller single-responsibility functions, using a template for function-level documentation</li>
+<li>The idea of <code>utils.R</code> reminds me of the Conditions files we made in JavaScript</li>
+</ul></li>
+<li>There were recommendations for specific syntax changes that I wasn’t fully aware of (e.g., <code>seq_len(n)</code>, <code>sprintf()</code>)</li>
+</ul></li>
+<li>Some takeaways:
+<ul>
+<li>I’ve learned so much in this course, but the world of coding is large and ever-growing, so there is much that can be learned. Hence, the multiple AI suggestions that were unfamiliar to me or that didn’t cross my mind as potential areas of improvement.
+<ul>
+<li>That said, it goes to show how AI may be a powerful asset to refactoring code. If there are truly so many areas for potential improvement, human capacities may be limited here. Researcher collaboration, therefore, is of great importance, and ethical, smart use of AI can be a help.</li>
+<li>Yet, a level of caution should be taken if using AI for refactoring. There’s a risk of overcomplication and inaccuracy; if I had just followed AI, I likely would have been more confused and missed the more blatant areas of improvement.</li>
+</ul></li>
+<li>The modularization we learned this semester is highly recommended by AI and can be extrapolated upon. We practiced the basics with having a few designated functions and R scripts and bringing them all together, but AI recommends that we adopt an even more mirco scale with single-responsibility functions and scripts. At first, it may seem a bit cluttered with so many working parts, but I can definitely understand the benefits such as easily isolating errors.</li>
+<li>R is always evolving, indicated by the AI recommendation to remove <code>stringsAsFactors = FALSE</code> because it’s default in this version. Coding effectively can also mean staying up-to-date with the state of the field.</li>
+<li>As previously mentioned, a lot of AI’s recommendations had to do with transitioning from manual to automatic, increasing modularization, and improving details of functioning code.
+<ul>
+<li>It seems to me that several of AI’s recommendations were ‘extras’, not necessarily make-or-break changes but additional improvements to strengthen the code.</li>
+<li>Recommendations were numerous. I imagine the dialogue in collaboration with researchers, coders, and AI can be extensive and, in a sense, doesn’t have an “end” point – especially when code can achieve the same result through various mechanisms. In this way, code operates much like a “living document”.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="full-documentation" class="level3">
+<h3 class="anchored" data-anchor-id="full-documentation">Full Documentation:</h3>
+</section>
+<section id="getting-ai-suggestions-on-the-original-project" class="level3">
+<h3 class="anchored" data-anchor-id="getting-ai-suggestions-on-the-original-project">Getting AI Suggestions on the Original Project</h3>
+<p>The first step is to give the original project to AI.</p>
+<ul>
+<li>I provided the original <code>project2.zip</code> file to ChatGPT.</li>
+<li>My prompt: I am attaching an R project from my programming class. Please review and list specific improvements to optimize the code or make it clearer. We primarily use base R, here, jsonlite, aggregate and the apply family of functions, but not dplyr or tidyverse. Please put any tidyverse recommendations in their own section and suggest at least 3 non-tidyverse improvements. We also have not learned Makefile or targets pipelines.</li>
+</ul>
+<p>These were ChatGPT’s suggestions:</p>
+<ul>
+<li>Reduce Repeated File-Reading / Validation Logic: Across multiple scripts, you re-read raw CSVs and repeat similar checks (e.g., required columns, error handling, applying <code>regexpr</code> patterns to read IDs).
+<ul>
+<li>Create one helper function, e.g.&nbsp;<code>read_raw_csv(file)</code> placed in <code>scripts/utils.R</code>, that:
+<ul>
+<li>reads the CSV</li>
+<li>validates required columns</li>
+<li>extracts participant ID This prevents duplicated checks and reduces maintenance cost.</li>
+</ul></li>
+</ul></li>
+<li>Vectorize Where Possible Instead of Multiple <code>apply()</code> Layers: Some scripts use several nested <code>lapply</code> / <code>sapply</code> / <code>apply</code> calls over data frames where simple vectorized arithmetic would be clearer and faster.
+<ul>
+<li>Example patterns found:
+<ul>
+<li>computing accuracy row by row using <code>apply(df, 1, ...)</code></li>
+<li>multiple logical recodes inside loops</li>
+</ul></li>
+<li>Replace with:
+<ul>
+<li>direct vectorized arithmetic: <code>df$accuracy &lt;- df$correct == 1</code></li>
+<li>vectorized conditionals: <code>df$score &lt;- with(df, ifelse(...))</code></li>
+</ul></li>
+</ul></li>
+<li>Consolidate Regex-Based ID Extraction: Each script that processes filenames uses similar logic: <code>id &lt;- regmatches(file_name, regexpr("sub-[0-9]{3}", file_name))</code>
+<ul>
+<li>Recommendation:
+<ul>
+<li>Move this to a single helper: <code>extract_id &lt;- function(x) sub(".*(sub-[0-9]{3}).*", "\\1", x)</code></li>
+<li>Or use <code>stringr</code> only inside the tidyverse-optional section.</li>
+</ul></li>
+</ul></li>
+<li>Use <code>aggregate()</code> or <code>tapply()</code> More Consistently: In several places, the code manually loops to compute participant-level or condition-level summaries. Example: computing mean rt by condition inside a loop.
+<ul>
+<li>Replace with: <code>agg &lt;- aggregate(rt ~ congruency + block, df, mean)</code></li>
+<li>or <code>means &lt;- tapply(df$rt, list(df$congruency, df$block), mean)</code></li>
+</ul></li>
+<li>Improve Error Messages and Input Validation: The checks for missing columns are good, but some scripts simply <code>stop()</code> with long pasted strings.
+<ul>
+<li>Improvements:
+<ul>
+<li>Add <code>call. = FALSE</code> for cleaner error printing.</li>
+<li>Use <code>sprintf()</code> for formatting instead of <code>paste()</code>.</li>
+</ul></li>
+</ul></li>
+<li>Avoid Repeated Path Constructions
+<ul>
+<li>You frequently do:
+<ul>
+<li><code>paste0("data/raw/", file)</code></li>
+</ul></li>
+<li>Better:
+<ul>
+<li><code>file.path("data", "raw", file)</code></li>
+</ul></li>
+<li>Platform-independent, avoids accidental double slashes, clearer intent.</li>
+</ul></li>
+<li>Prefer <code>seq_len(n)</code> to <code>1:n</code>
+<ul>
+<li>Whenever the code loops through rows, use:
+<ul>
+<li><code>for (i in seq_len(nrow(df))) { ... }</code></li>
+<li>to prevent errors when <code>nrow(df) == 0</code>.</li>
+</ul></li>
+</ul></li>
+<li>Use <code>isTRUE()</code> When Checking Logical Columns
+<ul>
+<li>Instead of:
+<ul>
+<li><code>df$correct == 1</code></li>
+</ul></li>
+<li>use:
+<ul>
+<li><code>isTRUE(df$correct)</code></li>
+</ul></li>
+<li>or ensure correct data type at import. Reduces issues where “1” or TRUE can cause mismatches.</li>
+</ul></li>
+<li>Use <code>rowMeans()</code> for computing D-scores: In <code>calculate_iat_dscore.R</code>, the D-score computation often uses manual mean calculations.
+<ul>
+<li>Improve: <code>d &lt;- (mean(incongruent_rt) - mean(congruent_rt)) / sd(c(incongruent_rt, congruent_rt))</code></li>
+<li>or use: <code>rowMeans(cbind(x, y), na.rm = TRUE)</code></li>
+</ul></li>
+<li>Break Long Scripts into Smaller Functions
+<ul>
+<li>Some scripts (especially <code>import_and_process.R</code>) handle many responsibilities</li>
+<li>Recommend: follow single-responsibility structure: Much easier to test/debug.</li>
+</ul></li>
+<li>Add Documentation at the Function Level: You have some descriptions in comments, but consider using a consistent template
+<ul>
+<li>Even if not using roxygen2 formally, the structure increases clarity.</li>
+</ul></li>
+<li>Use Consistent Naming Conventions
+<ul>
+<li>Pick one system—snake_case is most common in R base workflows.</li>
+</ul></li>
+<li>Optional Tidyverse Improvements (Separate Section as Requested)
+<ul>
+<li>Replace <code>apply/aggregate</code> with <code>group_by</code> + <code>summarize</code></li>
+<li>Use <code>readr</code> instead of <code>read.csv</code></li>
+<li>Use <code>stringr</code> for cleaner ID extraction</li>
+<li>Use <code>purrr</code> for iterating over files</li>
+</ul></li>
+</ul>
+</section>
+<section id="getting-ai-suggestions-on-my-refactored-version" class="level3">
+<h3 class="anchored" data-anchor-id="getting-ai-suggestions-on-my-refactored-version">Getting AI Suggestions on my Refactored Version</h3>
+<p>My prompt: Here is my refactored version of the same project. Now what remaining improvements (relating to structure, clarity, or efficiency) would you recommend?</p>
+<p>ChatGPT’s suggestions:</p>
+<ul>
+<li>Create a small <code>utils.R</code> to consolidate truly repeated logic
+<ul>
+<li>Create a <code>scripts/utils.R</code> file containing:
+<ul>
+<li><code>read_raw_csv()</code></li>
+<li><code>extract_sub_id()</code></li>
+<li><code>check_required_columns(df, required)</code></li>
+<li><code>safe_mean()</code> wrapper <code>(na.rm = TRUE)</code></li>
+<li><code>validate_rt()</code> (e.g., min/max bounds)</li>
+</ul></li>
+</ul></li>
+<li>Split <code>import_and_process()</code> into 3 focused helper functions</li>
+<li>Standardize naming conventions across the whole project</li>
+<li>Replace repeated <code>subset(df, ...)</code> with indexed filters</li>
+<li>Remove <code>stringsAsFactors = FALSE</code> everywhere (it’s already default)</li>
+<li>Use rowwise vectorization instead of apply-inside-apply patterns</li>
+<li>Check for required columns in one place, not repeatedly</li>
+<li>Use <code>file.path()</code> uniformly rather than mixing with <code>paste0</code></li>
+<li>Deduplicate D-score computation and put it in <code>calculate_iat_dscore.R</code>
+<ul>
+<li>Keep all IAT-related math in one script</li>
+</ul></li>
+<li>Use clearer data-frame construction for final summary rows
+<ul>
+<li>Standardize this into a single helper</li>
+</ul></li>
+<li>Add optional message/reporting flags</li>
+</ul>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

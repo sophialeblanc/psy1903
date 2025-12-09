@@ -1,0 +1,190 @@
+---
+title: "Project 2 — Part 3: AI Refactor"
+author: "Sophia LeBlanc"
+format:
+  html:
+    fig-number: true
+execute:
+  echo: true
+  warning: true
+  message: true
+---
+### My Comparison Report
+
+Original Issues & Refactoring
+
++ Initially, I identified places to refactor based on opportunities for indexing by best practices and writing vectorized code. There were some places where indexing was especially susceptible to error if the data were to undergo any editing/manipulation. Further, there were areas of code that were excessively long and slow; particularly, for loops function to explicitly operate on elements one-by-one. The code would benefit from vectorized versions that involve shorter, faster code that automatically applies-all. Clarity and efficiency would result.
+  + In `summarize_behavior.R`, a section of code was indexed by position, which left the code vulnerable to changes in data order. Indexing by name is more reliable, readable, and resilient to order changes. I also replaced hardcoded values with placeholders to adapt to upper/lower limit changes. I re-wrote the code as such:
+    + Initial: `valid_data_rt <- data[data[ , 3] >= 300 & data[ , 3] <= 900 & data[ , 12] == TRUE, ]`
+    + Rewrite: `valid_data_rt <- data[data$rt >= rt_min & data$rt <= rt_max & data$correct == TRUE, ]`
+    + Initial: `valid_data_acc <- data[data[ , 3] >= 300 & data[ , 3] <= 900, ]`
+    + Re-write: `valid_data_acc <- data[data$rt >= rt_min & data$rt <= rt_max, ]`
+  + Also in `summarize_behavior.R`, there was a for loop performing calculations inefficiently, row-by-row. My vectorized version applied the same calculation to an entire column:
+    + Initial: `for (i in 1:nrow(valid_data_rt)) { valid_data_rt$rt_centered[i] <- valid_data_rt$rt[i] - mean(valid_data_rt$rt, na.rm = TRUE) }`
+    + Re-write: `valid_data_rt$rt_centered <- valid_data_rt$rt - mean(valid_data_rt$rt, na.rm = TRUE)`
+  + Finally, in `build_participant_wide.R`, there was also a for loop occupying several lines of code, applying a function to elements of a list one-by-one. Using lapply, I condensed this code to one line; it applies the same function to all elements in a list and returns the results: 
+    + Initial: `rows <- list() for (i in seq_along(files)) { file_name <- files[i] rows[[i]] <- import_and_process(file_name) }`
+    + Re-write: `rows <- lapply(files, import_and_process)`
++ For me and my coding familiarity, these seemed to be the most urgent and identifiable places for refactoring.
+
+Optimization Ideas from AI for the Unedited Project (See "Full Documentation" for more detail)
+
++ Reduce Repeated File-Reading / Validation Logic: Create helper functions and place in `utils.R`
++ Vectorize Where Possible Instead of Multiple `apply()` Layers
++ Consolidate Regex-Based ID Extraction
++ Use `aggregate()` or `tapply()` More Consistently: In several places, the code manually loops to compute participant-level or condition-level summaries.
++ Improve Error Messages and Input Validation
++ Avoid Repeated Path Constructions
++ Prefer `seq_len(n)` to `1:n`
++ Use `isTRUE()` When Checking Logical Columns
++ Use `rowMeans()` for computing D-scores: In `calculate_iat_dscore.R`, the D-score computation often uses manual mean calculations.
++ Break Long Scripts into Smaller Functions
++ Add Documentation at the Function Level: You have some descriptions in comments, but consider using a consistent template
++ Use Consistent Naming Conventions
++ Optional Tidyverse Improvements
+  + Replace `apply/aggregate` with `group_by` + `summarize`
+  + Use `readr` instead of `read.csv`
+  + Use `stringr` for cleaner ID extraction
+  + Use `purrr` for iterating over files
+
+Optimization Ideas from AI for my Refactored Project
+
++ Create `utils.R` to consolidate truly repeated logic (create and store repeated functions here)
++ Split `import_and_process()` into 3 focused helper functions
++ Standardize naming conventions across the whole project
++ Replace repeated `subset(df, ...)` with indexed filters
++ Remove `stringsAsFactors = FALSE` everywhere (it’s already default)
++ Use rowwise vectorization instead of apply-inside-apply patterns
++ Check for required columns in one place, not repeatedly
++ Use `file.path()` uniformly rather than mixing with `paste0`
++ Deduplicate D-score computation and put it in `calculate_iat_dscore.R`
++ Use clearer data-frame construction for final summary rows
++ Add optional message/reporting flags
+
+
+Comparison & Reflection
+
++ Similarities
+  + AI noted the importance of vectorizing where possible and avoiding manual loops
+    + Similarly, I was on the look-out for these improvements; I eliminated two manual loops.
+    + AI and I both emphasized transitions from manual to automatic
+    + However, AI seemed to point to different examples (e.g., nested `apply()`) than I worked on, so there are likely more areas where this is applicable, beyond my changes. Still, the concept is similar.
+  + AI noted that `subset()` may be replaced with name-indexing, although this was oddly only mentioned for my refactored code. I similarly converted to indexing practices by name, but in a different area of the code that was indexing by position. I can apply this logic to other areas.
+  + AI also recommended to avoid repeated path constructions. While my refactoring did not include this, I will say this was in-mind conceptually and related to my de-bugging, too. Class taught us the importance of relative paths, awareness of working directories, etc. 
+    + Consistent naming conventions was another recommendation that related more to my de-bugging but can still be improved upon even when functionality is reached. 
+  
++ Differences
+  + Overall, AI suggested several modifications that, to be honest, weren't on my radar when I was searching for points of needed improvement.
+    + Some recommendations were quite advanced, beyond what I could fully comprehend (e.g., function-level documentation, Tidyverse)
+    + The recommendations generally felt more advanced and detail-oriented, whereas the changes I implemented felt more obvious and urgent
+  + AI suggested overarching structural changes, which is far beyond the scope I had considered. I was focused on the direct code I was reading, but it's important to also zoom out. 
+    + Examples: creating new helper functions, creating `utils.R` to store them, breaking scripts into smaller single-responsibility functions, using a template for function-level documentation
+    + The idea of `utils.R` reminds me of the Conditions files we made in JavaScript
+  + There were recommendations for specific syntax changes that I wasn't fully aware of (e.g., `seq_len(n)`, `sprintf()`)
+
++ Some takeaways:
+  + I've learned so much in this course, but the world of coding is large and ever-growing, so there is much that can be learned. Hence, the multiple AI suggestions that were unfamiliar to me or that didn't cross my mind as potential areas of improvement.
+    + That said, it goes to show how AI may be a powerful asset to refactoring code. If there are truly so many areas for potential improvement, human capacities may be limited here. Researcher collaboration, therefore, is of great importance, and ethical, smart use of AI can be a help.
+    + Yet, a level of caution should be taken if using AI for refactoring. There's a risk of overcomplication and inaccuracy; if I had just followed AI, I likely would have been more confused and missed the more blatant areas of improvement. 
+  + The modularization we learned this semester is highly recommended by AI and can be extrapolated upon. We practiced the basics with having a few designated functions and R scripts and bringing them all together, but AI recommends that we adopt an even more mirco scale with single-responsibility functions and scripts. At first, it may seem a bit cluttered with so many working parts, but I can definitely understand the benefits such as easily isolating errors.
+  + R is always evolving, indicated by the AI recommendation to remove `stringsAsFactors = FALSE` because it's default in this version. Coding effectively can also mean staying up-to-date with the state of the field.
+  + As previously mentioned, a lot of AI's recommendations had to do with transitioning from manual to automatic, increasing modularization, and improving details of functioning code. 
+    + It seems to me that several of AI's recommendations were 'extras', not necessarily make-or-break changes but additional improvements to strengthen the code.
+    + Recommendations were numerous. I imagine the dialogue in collaboration with researchers, coders, and AI can be extensive and, in a sense, doesn't have an "end" point -- especially when code can achieve the same result through various mechanisms. In this way, code operates much like a "living document". 
+    
+
+### Full Documentation:
+
+### Getting AI Suggestions on the Original Project
+
+
+The first step is to give the original project to AI.
+
++ I provided the original `project2.zip` file to ChatGPT.
++ My prompt: I am attaching an R project from my programming class. Please review and list specific improvements to optimize the code or make it clearer. We primarily use base R, here, jsonlite, aggregate and the apply family of functions, but not dplyr or tidyverse. Please put any tidyverse recommendations in their own section and suggest at least 3 non-tidyverse improvements. We also have not learned Makefile or targets pipelines.
+
+These were ChatGPT's suggestions: 
+
++ Reduce Repeated File-Reading / Validation Logic: Across multiple scripts, you re-read raw CSVs and repeat similar checks (e.g., required columns, error handling, applying `regexpr` patterns to read IDs). 
+  + Create one helper function, e.g. `read_raw_csv(file)` placed in `scripts/utils.R`, that:
+    + reads the CSV
+    + validates required columns
+    + extracts participant ID
+    This prevents duplicated checks and reduces maintenance cost.
++ Vectorize Where Possible Instead of Multiple `apply()` Layers: Some scripts use several nested `lapply` / `sapply` / `apply` calls over data frames where simple vectorized arithmetic would be clearer and faster.
+  + Example patterns found:
+    + computing accuracy row by row using `apply(df, 1, ...)`
+    + multiple logical recodes inside loops
+  + Replace with:
+    + direct vectorized arithmetic: `df$accuracy <- df$correct == 1`
+    + vectorized conditionals: `df$score <- with(df, ifelse(...))`
++ Consolidate Regex-Based ID Extraction: Each script that processes filenames uses similar logic: `id <- regmatches(file_name, regexpr("sub-[0-9]{3}", file_name))`
+  + Recommendation:
+    + Move this to a single helper: `extract_id <- function(x) sub(".*(sub-[0-9]{3}).*", "\\1", x)`
+    + Or use `stringr` only inside the tidyverse-optional section.
++ Use `aggregate()` or `tapply()` More Consistently: In several places, the code manually loops to compute participant-level or condition-level summaries. Example: computing mean rt by condition inside a loop.  
+  + Replace with: `agg <- aggregate(rt ~ congruency + block, df, mean)`
+  + or `means <- tapply(df$rt, list(df$congruency, df$block), mean)`
++ Improve Error Messages and Input Validation: The checks for missing columns are good, but some scripts simply `stop()` with long pasted strings.
+  + Improvements:
+    + Add `call. = FALSE` for cleaner error printing.
+    + Use `sprintf()` for formatting instead of `paste()`.
++ Avoid Repeated Path Constructions
+  + You frequently do:
+    + `paste0("data/raw/", file)`
+  + Better:
+    + `file.path("data", "raw", file)`
+  + Platform-independent, avoids accidental double slashes, clearer intent.
++ Prefer `seq_len(n)` to `1:n`
+  + Whenever the code loops through rows, use:
+    + `for (i in seq_len(nrow(df))) { ... }`
+    + to prevent errors when `nrow(df) == 0`.
++ Use `isTRUE()` When Checking Logical Columns
+  + Instead of:
+    + `df$correct == 1`
+  + use:
+    + `isTRUE(df$correct)`
+  + or ensure correct data type at import. Reduces issues where "1" or TRUE can cause mismatches.
++ Use `rowMeans()` for computing D-scores: In `calculate_iat_dscore.R`, the D-score computation often uses manual mean calculations.
+  + Improve: `d <- (mean(incongruent_rt) - mean(congruent_rt)) / sd(c(incongruent_rt, congruent_rt))`
+  + or use: `rowMeans(cbind(x, y), na.rm = TRUE)`
++ Break Long Scripts into Smaller Functions
+  + Some scripts (especially `import_and_process.R`) handle many responsibilities
+  + Recommend: follow single-responsibility structure: Much easier to test/debug.
++ Add Documentation at the Function Level: You have some descriptions in comments, but consider using a consistent template
+  + Even if not using roxygen2 formally, the structure increases clarity.
++ Use Consistent Naming Conventions
+  + Pick one system—snake_case is most common in R base workflows.
++ Optional Tidyverse Improvements (Separate Section as Requested)
+  + Replace `apply/aggregate` with `group_by` + `summarize`
+  + Use `readr` instead of `read.csv`
+  + Use `stringr` for cleaner ID extraction
+  + Use `purrr` for iterating over files
+
+
+### Getting AI Suggestions on my Refactored Version
+
+
+My prompt: Here is my refactored version of the same project. Now what remaining improvements (relating to structure, clarity, or efficiency) would you recommend?
+
+ChatGPT's suggestions:
+
++ Create a small `utils.R` to consolidate truly repeated logic
+  + Create a `scripts/utils.R` file containing:
+    + `read_raw_csv()`
+    + `extract_sub_id()`
+    + `check_required_columns(df, required)`
+    + `safe_mean()` wrapper `(na.rm = TRUE)`
+    + `validate_rt()` (e.g., min/max bounds)
++ Split `import_and_process()` into 3 focused helper functions
++ Standardize naming conventions across the whole project
++ Replace repeated `subset(df, ...)` with indexed filters
++ Remove `stringsAsFactors = FALSE` everywhere (it’s already default)
++ Use rowwise vectorization instead of apply-inside-apply patterns
++ Check for required columns in one place, not repeatedly
++ Use `file.path()` uniformly rather than mixing with `paste0`
++ Deduplicate D-score computation and put it in `calculate_iat_dscore.R`
+  + Keep all IAT-related math in one script
++ Use clearer data-frame construction for final summary rows
+  + Standardize this into a single helper
++ Add optional message/reporting flags

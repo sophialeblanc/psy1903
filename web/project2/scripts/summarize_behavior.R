@@ -31,17 +31,33 @@ summarize_behavior <- function(data, rt_min = 300, rt_max = 900) {
     data$correct <- normalize_logical(data$correct)
   }
   
+  ## REFACTOR: See initial code commented below, followed by my revision
+    ## The indexing does not follow best practices at first,
+    ## it relies on positionality which is subject to change if data is edited/moved.
+    ## Indexing by name is more reliable, readable, and resilient to order changes.
+    ## Further, I switched from hardcoded values to min/max placeholders, which allows
+    ## flexibility if the arguments (lower and upper limits) change.
+  
   ## Filter out trials where RT was outside of the threshold range
-  valid_data_rt <- data[data[ , 3] >= 300 & data[ , 3] <= 900 & data[ , 12] == TRUE, ]
-  valid_data_acc <- data[data[ , 3] >= 300 & data[ , 3] <= 900, ]
+  ## valid_data_rt <- data[data[ , 3] >= 300 & data[ , 3] <= 900 & data[ , 12] == TRUE, ]
+  ## valid_data_acc <- data[data[ , 3] >= 300 & data[ , 3] <= 900, ]
+  valid_data_rt <- data[data$rt >= rt_min & data$rt <= rt_max & data$correct == TRUE, ]
+  valid_data_acc <- data[data$rt >= rt_min & data$rt <= rt_max, ]
   
   ## Center each participant’s reaction times:
   ## subtract the participant’s mean RT so centered RTs average to zero
   valid_data_rt$rt_centered <- NA_real_
-  for (i in 1:nrow(valid_data_rt)) {
-    valid_data_rt$rt_centered[i] <- valid_data_rt$rt[i] - mean(valid_data_rt$rt, na.rm = TRUE)
-  }
+  
+  ## REFACTOR: See initial code commented below, followed by my revision.
+    ## I made this step more clear & concise by eliminating the "for" loop,
+    ## which was inefficiently performing the calculation row by row.
+    ## The vectorized version automatically applies to the entire column.
+  
+  ##for (i in 1:nrow(valid_data_rt)) {
+    ##valid_data_rt$rt_centered[i] <- valid_data_rt$rt[i] - mean(valid_data_rt$rt, na.rm = TRUE)
+  ##}
 
+  valid_data_rt$rt_centered <- valid_data_rt$rt - mean(valid_data_rt$rt, na.rm = TRUE)
   
   ## Prepare test trials by excluding practice trials
   ## Keep only trials where expectedCategory is:
@@ -57,9 +73,11 @@ summarize_behavior <- function(data, rt_min = 300, rt_max = 900) {
     "nature or anxiety or school or serenity"
   )
   grp_rt <- factor(
-    test_data_rt$expectedCategoryDisplayed,
+    test_data_rt$expectedCategoryAsDisplayed,
     levels = desired_order
   )
+  
+  ## CORRECTION: Typo above^^, initially read "expectedCategoryDisplayed" when should be "expectedCategoryAsDisplayed"
   
   grp_acc <- factor(
     test_data_acc$expectedCategoryAsDisplayed,
